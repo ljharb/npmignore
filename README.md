@@ -35,7 +35,7 @@ test/fixtures
 In the command line run:
 
 ```bash
-ignore "test/fixtures"
+npmignore "test/fixtures"
 ```
 
 An `.npmignore` file will be created, or updated:
@@ -50,7 +50,7 @@ test/fixtures
 
 **Heads up!**
 
-The `# npmignore` comment is used to ensure that `.npmignore` reflects the latest changes in your `.gitignore` file, just by running `ignore` in the command line.
+The `# npmignore` comment is used to ensure that `.npmignore` reflects the latest changes in your `.gitignore` file, just by running `npmignore` in the command line.
 
 _If you want to preserve everything in your `.npmignore` file, regardless of what is in `.gitignore`, just add the `# npmignore` comment at the top of the `.npmignore` file.
 
