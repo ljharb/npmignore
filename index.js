@@ -6,7 +6,7 @@
 
 var uniq = require('array-uniq');
 var comment = '# npmignore';
-var re = new RegExp(comment);
+var re = /#\s*npmignore/;
 
 /**
  * Create or update a .npmignore file.
@@ -21,10 +21,6 @@ module.exports = function npmignore(npm, git, options) {
   if (typeof git !== 'string') {
     options = git;
     git = '';
-  }
-
-  if (npm == null) {
-    return format(git);
   }
 
   options = options || {};
@@ -44,7 +40,7 @@ module.exports = function npmignore(npm, git, options) {
   }
 
   // Remove the comment, we re-add later
-  npm = diff(npm, comment);
+  npm = diff(npm, comment.concat('#npmignore'));
   npm = diff(npm, git);
 
   if (options.ignore) {
@@ -105,18 +101,20 @@ module.exports.extract = extract;
  */
 
 function format(git, npm) {
-  git = git || [];
+  git = Array.isArray(git) ? git.join('\n') : git;
+  npm = Array.isArray(npm) ? npm.join('\n') : npm;
 
-  if (npm == null || Array.isArray(npm) && npm.length === 0) {
-    return git.join('\n');
+  var res = '';
+
+  if (git) {
+    res += git;
   }
 
-  return ''
-    + git.join('\n')
-    + '\n\n'
-    + comment
-    + '\n'
-    + npm.join('\n');
+  if (npm) {
+    res += '\n\n' + comment + '\n'+ npm;
+  }
+
+  return res;
 }
 
 /**

@@ -54,6 +54,13 @@ The `# npmignore` comment is used to ensure that `.npmignore` reflects the lates
 
 _If you want to preserve everything in your `.npmignore` file, regardless of what is in `.gitignore`, just add the `# npmignore` comment at the top of the `.npmignore` file.
 
+## CLI commands
+
+ - `-i`|`--ignore`: comma-separated list of patterns to add to `.npmignore`
+ - `-u`|`--unignore`: comma-separated list of patterns to remove from `.npmignore`
+ - `-d`|`--dest`: alternate destination filepath. Good for test driving to see what it will output.
+
+
 ## Contributing
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/npmignore/issues).
 
