@@ -57,8 +57,33 @@ _If you want to preserve everything in your `.npmignore` file, regardless of wha
 ## CLI commands
 
  - `-i`|`--ignore`: comma-separated list of patterns to add to `.npmignore`
- - `-u`|`--unignore`: comma-separated list of patterns to remove from `.npmignore`
- - `-d`|`--dest`: alternate destination filepath. Good for test driving to see what it will output.
+ - `-u`|`--unignore`: comma-separated list of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`.
+ - `-d`|`--dest`: optionally define a different destination filepath. Good for test driving to see what will be generated in advance.
+ - `-g`|`--gitignore`: alternate source filepath for `.gitignore`.
+ - `-n`|`--npmignore`: alternate source filepath for `.npmignore`.
+
+## API
+
+To use via API, first:
+
+```bash
+npm i npmignore --save
+```
+
+Then:
+
+```js
+var npmignore = require('npmignore');
+npmignore(npm, git, options);
+```
+
+**Params**
+
+ - `npm` {String|Array}: String from `.npmignore` or an array of patterns to use.
+ - `git` {String|Array}: String from `.gitignore` or an array of patterns to use.
+ - `options` {Object}
+    + `ignore` Array of patterns to add to the existing patterns from `.gitignore`
+    + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
 
 
 ## Contributing

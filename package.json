@@ -1,7 +1,7 @@
 {
   "name": "npmignore",
   "description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/jonschlinkert/npmignore",
   "author": {
     "name": "Jon Schlinkert",
