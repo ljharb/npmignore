@@ -1,0 +1,53 @@
+{
+  "name": "npmignore",
+  "description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/npmignore",
+  "author": {
+    "name": "Jon Schlinkert",
+    "url": "https://github.com/jonschlinkert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jonschlinkert/npmignore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/npmignore/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jonschlinkert/npmignore/blob/master/LICENSE-MIT"
+    }
+  ],
+  "preferGlobal": true,
+  "bin": {
+    "npmignore": "./cli.js"
+  },
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "devDependencies": {
+    "verb-tag-jscomments": ">= 0.2.0",
+    "verb": ">= 0.2.6",
+    "mocha": "*"
+  },
+  "keywords": [
+    "docs",
+    "documentation",
+    "generate",
+    "generator",
+    "markdown",
+    "templates",
+    "verb"
+  ],
+  "dependencies": {
+    "array-uniq": "^1.0.1",
+    "minimist": "^1.1.0",
+    "verbalize": "^0.1.2"
+  }
+}
