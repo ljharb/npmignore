@@ -5,7 +5,10 @@
  */
 
 var uniq = require('array-uniq');
-var comment = '# npmignore';
+var comment = [
+  '# npmignore - content above this line is automatically generated and modifications may be omitted',
+  '# see npmjs.com/npmignore for more details.'
+].join('\n');
 var re = /#\s*npmignore/;
 
 /**
@@ -40,7 +43,7 @@ module.exports = function npmignore(npm, git, options) {
   }
 
   // Remove the comment, we re-add later
-  npm = diff(npm, comment.concat('#npmignore'));
+  npm = diff(npm, comment.concat('#npmignore # npmignore'));
   npm = diff(npm, git);
 
   if (options.ignore) {
