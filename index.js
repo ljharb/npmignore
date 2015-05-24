@@ -95,8 +95,9 @@ function extract(npmignore) {
 module.exports.extract = extract;
 
 /**
- * Normalize newlines and split the string
- * into an array.
+ * Rebuild array back into newline delimited,
+ * merging .gitignore, .npmignore extras &
+ * comments (expcted output).
  *
  * @param  {String} `str`
  * @return {Array}
