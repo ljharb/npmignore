@@ -6,21 +6,21 @@
 
 var uniq = require('array-uniq');
 var comment = [
-  '# npmignore - content above this line is automatically generated and modifications may be omitted',
-  '# see npmjs.com/npmignore for more details.'
+  '# dockerignore - content above this line is automatically generated and modifications may be omitted',
+  '# see npmjs.com/dockerignore for more details.'
 ].join('\n');
-var re = /#\s*npmignore/;
+var re = /#\s*dockerignore/;
 
 /**
- * Create or update a .npmignore file.
+ * Create or update a .dockerignore file.
  *
- * @param  {String} `npm` String, from `.npmignore`
+ * @param  {String} `dock` String, from `.dockerignore`
  * @param  {String} `git` String, from `.gitignore`
  * @param  {Object} `options`
  * @return {String}
  */
 
-module.exports = function npmignore(npm, git, options) {
+module.exports = function dockerignore(dock, git, options) {
   if (typeof git !== 'string') {
     options = git;
     git = '';
@@ -32,60 +32,60 @@ module.exports = function npmignore(npm, git, options) {
     git = split(git);
   }
 
-  // get the relevant lines from `.npmignore`
-  if (typeof npm === 'string') {
-    npm = extract(npm);
+  // get the relevant lines from `.dockerignore`
+  if (typeof dock === 'string') {
+    dock = extract(dock);
   }
 
   if (options.unignore) {
     git = diff(git, arrayify(options.unignore));
-    npm = diff(npm, arrayify(options.unignore));
+    dock = diff(dock, arrayify(options.unignore));
   }
 
   // Remove the comment, we re-add later
-  npm = diff(npm, comment.concat('#npmignore # npmignore'));
-  npm = diff(npm, git);
+  dock = diff(dock, comment.concat('#dockerignore # dockerignore'));
+  dock = diff(dock, git);
 
   if (options.ignore) {
-    npm = npm.concat(arrayify(options.ignore));
+    dock = dock.concat(arrayify(options.ignore));
   }
 
-  return format(git, uniq(npm));
+  return format(git, uniq(dock));
 }
 
 /**
- * Extract relevant lines from `.npmignore`
+ * Extract relevant lines from `.dockerignore`
  *
- * @param  {String} `npmignore` string
+ * @param  {String} `dockerignore` string
  * @return {Array} Array of lines
  */
 
-function extract(npmignore) {
-  if (npmignore == null) {
-    throw new Error('npmignore expects a string.');
+function extract(dockerignore) {
+  if (dockerignore == null) {
+    throw new Error('dockerignore expects a string.');
   }
 
-  var lines = split(npmignore);
+  var lines = split(dockerignore);
   var len = lines.length;
-  var npmignored = false;
+  var dockerignored = false;
   var git = [];
-  var npm = [];
+  var dock = [];
   var i = 0;
 
   while (i < len) {
     var line = lines[i++];
     if (re.test(line)) {
-      npmignored = true;
+      dockerignored = true;
     }
 
-    if (npmignored) {
-      npm.push(line);
+    if (dockerignored) {
+      dock.push(line);
     } else {
       git.push(line);
     }
   }
 
-  return npm;
+  return dock;
 }
 
 /**
@@ -96,7 +96,7 @@ module.exports.extract = extract;
 
 /**
  * Rebuild array back into newline delimited,
- * merging .gitignore, .npmignore extras &
+ * merging .gitignore, .dockerignore extras &
  * comments (expcted output).
  *
  * @param  {String} `str`
@@ -104,9 +104,9 @@ module.exports.extract = extract;
  * @api private
  */
 
-function format(git, npm) {
+function format(git, dock) {
   git = Array.isArray(git) ? git.join('\n') : git;
-  npm = Array.isArray(npm) ? npm.join('\n') : npm;
+  dock = Array.isArray(dock) ? dock.join('\n') : dock;
 
   var res = '';
 
@@ -114,8 +114,8 @@ function format(git, npm) {
     res += git;
   }
 
-  if (npm) {
-    res += '\n\n' + comment + '\n'+ npm;
+  if (dock) {
+    res += '\n\n' + comment + '\n'+ dock;
   }
 
   return res;

@@ -1,11 +1,11 @@
-# npmignore [![NPM version](https://badge.fury.io/js/npmignore.svg)](http://badge.fury.io/js/npmignore)
+# dockerignore [![NPM version](https://badge.fury.io/js/dockerignore.svg)](http://badge.fury.io/js/dockerignore)
 
-> Command line tool for creating or updating a .npmignore file based on .gitignore.
+> Command line tool for creating or updating a .dockerignore file based on .gitignore.
 
 ## Install globally with [npm](npmjs.org):
 
 ```bash
-npm i -g npmignore
+npm i -g dockerignore
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ node_modules
 test/actual
 ```
 
-And you want `.npmignore` to have:
+And you want `.dockerignore` to have:
 
 ```bash
 node_modules
@@ -28,55 +28,55 @@ test/fixtures
 In the command line run:
 
 ```bash
-npmignore "test/fixtures"
+dockerignore "test/fixtures"
 ```
 
-An `.npmignore` file will be created, or updated:
+An `.dockerignore` file will be created, or updated:
 
 ```bash
 node_modules
 test/actual
 
-# npmignore
+# dockerignore
 test/fixtures
 ```
 
 **Heads up!**
 
-The `# npmignore` comment is used to ensure that `.npmignore` reflects the latest changes in your `.gitignore` file, just by running `npmignore` in the command line.
+The `# dockerignore` comment is used to ensure that `.dockerignore` reflects the latest changes in your `.gitignore` file, just by running `dockerignore` in the command line.
 
-_If you want to preserve everything in your `.npmignore` file, regardless of what is in `.gitignore`, just add the `# npmignore` comment at the top of the `.npmignore` file.
+_If you want to preserve everything in your `.dockerignore` file, regardless of what is in `.gitignore`, just add the `# dockerignore` comment at the top of the `.dockerignore` file.
 
 ## CLI commands
 
- - `-i`|`--ignore`: comma-separated list of patterns to add to `.npmignore`
- - `-u`|`--unignore`: comma-separated list of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`.
- - `-d`|`--dest`: optionally define a different destination filepath. Good for test driving to see what will be generated in advance.
+ - `-i`|`--ignore`: comma-separated list of patterns to add to `.dockerignore`
+ - `-u`|`--unignore`: comma-separated list of patterns to remove from `.dockerignore`. This will not un-ignore patterns in `.gitignore`.
+ - `-D`|`--dest`: optionally define a different destination filepath. Good for test driving to see what will be generated in advance.
  - `-g`|`--gitignore`: alternate source filepath for `.gitignore`.
- - `-n`|`--npmignore`: alternate source filepath for `.npmignore`.
+ - `-d`|`--dockerignore`: alternate source filepath for `.dockerignore`.
 
 ## API
 
 To use via API, first:
 
 ```bash
-npm i npmignore --save
+npm i dockerignore --save
 ```
 
 Then:
 
 ```js
-var npmignore = require('npmignore');
-npmignore(npm, git, options);
+var dockerignore = require('dockerignore');
+dockerignore(dock, git, options);
 ```
 
 **Params**
 
- - `npm` {String|Array}: String from `.npmignore` or an array of patterns to use.
+ - `dock` {String|Array}: String from `.dockerignore` or an array of patterns to use.
  - `git` {String|Array}: String from `.gitignore` or an array of patterns to use.
  - `options` {Object}
     + `ignore` Array of patterns to add to the existing patterns from `.gitignore`
-    + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
+    + `unignore` Array of patterns to remove from `.dockerignore`. This will not un-ignore patterns in `.gitignore`
 
 
 ## Run tests
@@ -87,9 +87,16 @@ npm i -d && npm test
 ```
 
 ## Contributing
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/npmignore/issues)
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jamestalmage/dockerignore/issues)
 
-## Author
+## Maintainer
+
+**James Talmage**
+ 
++ [github/jamestalmage](https://github.com/jamestalmage)
++ [twitter/jamestalmage](http://twitter.com/jamestalmage)
+ 
+## Author of [npmignore](https://github.com/jonschlinkert/npmignore) (of which this is a fork)
 
 **Jon Schlinkert**
  
@@ -97,7 +104,7 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 + [twitter/jonschlinkert](http://twitter.com/jonschlinkert) 
 
 ## License
-Copyright (c) 2015 Jon Schlinkert  
+Original [npmignore](https://github.com/jonschlinkert/npmignore) utility Copyright (c) 2015 Jon Schlinkert  
 Released under the MIT license
 
 ***
