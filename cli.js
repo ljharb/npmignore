@@ -8,17 +8,17 @@ var log = require('verbalize');
 var argv = require('minimist')(process.argv.slice(2));
 var parser = require('./');
 
-log.runner = 'npmignore';
+log.runner = 'dockerignore';
 
 /**
  * Find the local `ignore` files we need
  */
 
 var gitignore = argv.g || '.gitignore';
-var npmignore = argv.n || '.npmignore';
+var dockerignore = argv.d || '.dockerignore';
 
 // optionally specify a different destination
-var dest = argv.d || argv.dest || npmignore;
+var dest = argv.D || argv.dest || dockerignore;
 
 // patterns to ignore
 var i = argv.i || argv.ignore;
@@ -30,12 +30,12 @@ if (typeof i === 'string') i = i.split(',');
 if (typeof u === 'string') u = u.split(',');
 
 var git = read(gitignore);
-var npm = read(npmignore);
+var dock = read(dockerignore);
 
-// Parse the files and create a new `.npmignore` file
+// Parse the files and create a new `.dockerignore` file
 // based on the given arguments along with data that
 // is already present in either or both files.
-var res = parser(npm, git, {ignore: i, unignore: u});
+var res = parser(dock, git, {ignore: i, unignore: u});
 
 // write the file.
 fs.writeFileSync(dest, res);

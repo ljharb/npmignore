@@ -1,22 +1,26 @@
 {
-  "name": "npmignore",
-  "description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
+  "name": "dockerignore",
+  "description": "Command line tool for creating or updating a .dockerignore file based on .gitignore.",
   "version": "0.2.0",
-  "homepage": "https://github.com/jonschlinkert/npmignore",
+  "homepage": "https://github.com/jamestalmage/dockerignore",
   "author": {
+    "name": "James Talmage",
+    "url": "https://github.com/jamestalmage"
+  },
+  "original_author": {
     "name": "Jon Schlinkert",
     "url": "https://github.com/jonschlinkert"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jonschlinkert/npmignore.git"
+    "url": "git://github.com/jamestalmage/dockerignore.git"
   },
   "bugs": {
-    "url": "https://github.com/jonschlinkert/npmignore/issues"
+    "url": "https://github.com/jamestalmage/dockerignore/issues"
   },
   "license": {
     "type": "MIT",
-    "url": "https://github.com/jonschlinkert/npmignore/blob/master/LICENSE"
+    "url": "https://github.com/jamestalmage/dockerignore/blob/master/LICENSE"
   },
   "files": [
     "index.js",
@@ -25,7 +29,7 @@
   "main": "index.js",
   "preferGlobal": true,
   "bin": {
-    "npmignore": "./cli.js"
+    "dockerignore": "./cli.js"
   },
   "engines": {
     "node": ">=0.10.0"
