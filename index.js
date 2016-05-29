@@ -118,7 +118,7 @@ function format(git, npm) {
     res += '\n\n' + comment + '\n'+ npm;
   }
 
-  return res;
+  return res + '\n';
 }
 
 /**
