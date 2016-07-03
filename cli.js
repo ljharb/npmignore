@@ -54,5 +54,5 @@ function read(fp) {
   if (!fs.existsSync(fp)) {
     return null;
   }
-  return fs.readFileSync(fp, 'utf8');
+  return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
