@@ -20,6 +20,9 @@ var npmignore = argv.n || argv.npmignore || '.npmignore';
 // optionally specify a different destination
 var dest = argv.d || argv.dest || npmignore;
 
+// whether to keep destination file intact
+var keepdest = argv.k || argv.keepdest || false;
+
 // patterns to ignore
 var i = argv.i || argv.ignore;
 
@@ -35,7 +38,7 @@ var npm = read(npmignore);
 // Parse the files and create a new `.npmignore` file
 // based on the given arguments along with data that
 // is already present in either or both files.
-var res = parser(npm, git, {ignore: i, unignore: u});
+var res = parser(npm, git, {ignore: i, unignore: u, keepdest: keepdest});
 
 // write the file.
 fs.writeFileSync(dest, res);
