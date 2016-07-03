@@ -45,7 +45,9 @@ log.inform('updated', dest);
 log.success('  Done.');
 
 function read(fp) {
-  fp = path.join(process.cwd(), fp);
+  if (!path.isAbsolute(fp)) {
+    fp = path.join(process.cwd(), fp);
+  }
   if (!fs.existsSync(fp)) {
     return null;
   }
