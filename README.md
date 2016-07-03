@@ -54,6 +54,7 @@ _If you want to preserve everything in your `.npmignore` file, regardless of wha
  - `-d`|`--dest`: optionally define a different destination filepath. Good for test driving to see what will be generated in advance.
  - `-g`|`--gitignore`: alternate source filepath for `.gitignore`.
  - `-n`|`--npmignore`: alternate source filepath for `.npmignore`.
+ - `-k`|`--keepdest`: avoids altering the destination file
 
 ## API
 
@@ -77,7 +78,7 @@ npmignore(npm, git, options);
  - `options` {Object}
     + `ignore` Array of patterns to add to the existing patterns from `.gitignore`
     + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
-
+    + `keepdest` if `true`, avoids altering the destination file
 
 ## Run tests
 Install dev dependencies.
