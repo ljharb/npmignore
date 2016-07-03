@@ -45,6 +45,9 @@ log.inform('updated', dest);
 log.success('  Done.');
 
 function read(fp) {
+  if (fp.indexOf(',') > -1) {
+    return fp.split(/,/g).map(read).join('\n');
+  }
   if (!path.isAbsolute(fp)) {
     fp = path.join(process.cwd(), fp);
   }
