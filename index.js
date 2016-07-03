@@ -34,7 +34,7 @@ module.exports = function npmignore(npm, git, options) {
 
   // get the relevant lines from `.npmignore`
   if (typeof npm === 'string') {
-    npm = extract(npm);
+    npm = extract(npm, {npmignored: options.keepdest});
   }
 
   if (options.unignore) {
@@ -60,21 +60,21 @@ module.exports = function npmignore(npm, git, options) {
  * @return {Array} Array of lines
  */
 
-function extract(npmignore) {
+function extract(npmignore, options) {
   if (npmignore == null) {
     throw new Error('npmignore expects a string.');
   }
 
   var lines = split(npmignore);
   var len = lines.length;
-  var npmignored = false;
+  var npmignored = options.npmignored || false;
   var git = [];
   var npm = [];
   var i = 0;
 
   while (i < len) {
     var line = lines[i++];
-    if (re.test(line)) {
+    if (!npmignored && re.test(line)) {
       npmignored = true;
     }
 
