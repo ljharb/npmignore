@@ -14,8 +14,8 @@ log.runner = 'npmignore';
  * Find the local `ignore` files we need
  */
 
-var gitignore = argv.g || '.gitignore';
-var npmignore = argv.n || '.npmignore';
+var gitignore = argv.g || argv.gitignore || '.gitignore';
+var npmignore = argv.n || argv.npmignore || '.npmignore';
 
 // optionally specify a different destination
 var dest = argv.d || argv.dest || npmignore;
@@ -45,9 +45,14 @@ log.inform('updated', dest);
 log.success('  Done.');
 
 function read(fp) {
-  fp = path.join(process.cwd(), fp);
+  if (fp.indexOf(',') > -1) {
+    return fp.split(/,/g).map(read).join('\n');
+  }
+  if (!path.isAbsolute(fp)) {
+    fp = path.join(process.cwd(), fp);
+  }
   if (!fs.existsSync(fp)) {
     return null;
   }
-  return fs.readFileSync(fp, 'utf8');
+  return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
