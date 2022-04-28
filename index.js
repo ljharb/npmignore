@@ -7,97 +7,9 @@
 var uniq = require('array-uniq');
 var comment = [
 	'# npmignore - content above this line is automatically generated and modifications may be omitted',
-	'# see npmjs.com/npmignore for more details.'
+	'# see npmjs.com/npmignore for more details.',
 ].join('\n');
 var re = /#\s*npmignore/;
-
-/**
- * Create or update a .npmignore file.
- *
- * @param  {String} `npm` String, from `.npmignore`
- * @param  {String} `git` String, from `.gitignore`
- * @param  {Object} `options`
- * @return {String}
- */
-
-module.exports = function npmignore(npm, git, options) {
-	if (typeof git !== 'string') {
-		options = git;
-		git = '';
-	}
-
-	options = options || {};
-
-	if (typeof git === 'string') {
-		git = split(git);
-	}
-
-	// get the relevant lines from `.npmignore`
-	if (typeof npm === 'string') {
-		npm = extract(npm, {npmignored: options.keepdest});
-	}
-
-	if (options.unignore) {
-		git = diff(git, [].concat(options.unignore));
-		npm = diff(npm, [].concat(options.unignore));
-	}
-
-	// Remove the comment, we re-add later
-	npm = diff(npm, comment.concat('#npmignore # npmignore'));
-	npm = diff(npm, git);
-
-	if (options.ignore) {
-		npm = npm.concat([].concat(options.ignore));
-	}
-
-	return format(git, uniq(npm));
-}
-
-/**
- * Extract relevant lines from `.npmignore`
- *
- * @param  {String} `npmignore` string
- * @return {Array} Array of lines
- */
-
-function extract(npmignore, options) {
-	if (npmignore == null) {
-		throw new TypeError('npmignore expects a string.');
-	}
-
-	var lines = split(npmignore);
-
-	if (options.npmignored) {
-		return lines;
-	}
-
-	var len = lines.length;
-	var npmignored = false;
-	var git = [];
-	var npm = [];
-	var i = 0;
-
-	while (i < len) {
-		var line = lines[i++];
-		if (re.test(line)) {
-			npmignored = true;
-		}
-
-		if (npmignored) {
-			npm.push(line);
-		} else {
-			git.push(line);
-		}
-	}
-
-	return npm;
-}
-
-/**
- * Expose `extract` function
- */
-
-module.exports.extract = extract;
 
 /**
  * Rebuild array back into newline delimited,
@@ -120,7 +32,7 @@ function format(git, npm) {
 	}
 
 	if (npm) {
-		res += '\n\n' + comment + '\n'+ npm;
+		res += '\n\n' + comment + '\n' + npm;
 	}
 
 	return res;
@@ -171,3 +83,91 @@ function diff(arr, remove) {
 
 	return res;
 }
+
+/**
+ * Extract relevant lines from `.npmignore`
+ *
+ * @param  {String} `npmignore` string
+ * @return {Array} Array of lines
+ */
+
+function extract(npmignore, options) {
+	if (npmignore == null) {
+		throw new TypeError('npmignore expects a string.');
+	}
+
+	var lines = split(npmignore);
+
+	if (options.npmignored) {
+		return lines;
+	}
+
+	var len = lines.length;
+	var npmignored = false;
+	var git = [];
+	var npm = [];
+	var i = 0;
+
+	while (i < len) {
+		var line = lines[i++];
+		if (re.test(line)) {
+			npmignored = true;
+		}
+
+		if (npmignored) {
+			npm.push(line);
+		} else {
+			git.push(line);
+		}
+	}
+
+	return npm;
+}
+
+/**
+ * Create or update a .npmignore file.
+ *
+ * @param  {String} `npm` String, from `.npmignore`
+ * @param  {String} `git` String, from `.gitignore`
+ * @param  {Object} `options`
+ * @return {String}
+ */
+
+module.exports = function npmignore(npm, git, options) {
+	if (typeof git !== 'string') {
+		options = git;
+		git = '';
+	}
+
+	options = options || {};
+
+	if (typeof git === 'string') {
+		git = split(git);
+	}
+
+	// get the relevant lines from `.npmignore`
+	if (typeof npm === 'string') {
+		npm = extract(npm, { npmignored: options.keepdest });
+	}
+
+	if (options.unignore) {
+		git = diff(git, [].concat(options.unignore));
+		npm = diff(npm, [].concat(options.unignore));
+	}
+
+	// Remove the comment, we re-add later
+	npm = diff(npm, comment.concat('#npmignore # npmignore'));
+	npm = diff(npm, git);
+
+	if (options.ignore) {
+		npm = npm.concat([].concat(options.ignore));
+	}
+
+	return format(git, uniq(npm));
+};
+
+/**
+ * Expose `extract` function
+ */
+
+module.exports.extract = extract;

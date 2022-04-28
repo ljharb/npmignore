@@ -10,6 +10,19 @@ var parser = require('./');
 
 log.runner = 'npmignore';
 
+function read(fp) {
+	if (fp.indexOf(',') > -1) {
+		return fp.split(/,/g).map(read).join('\n');
+	}
+	if (!path.isAbsolute(fp)) {
+		fp = path.join(process.cwd(), fp);
+	}
+	if (!fs.existsSync(fp)) {
+		return null;
+	}
+	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
+}
+
 /**
  * Find the local `ignore` files we need
  */
@@ -29,8 +42,12 @@ var i = argv.i || argv.ignore;
 // patterns to un-ignore
 var u = argv.u || argv.unignore;
 
-if (typeof i === 'string') i = i.split(',');
-if (typeof u === 'string') u = u.split(',');
+if (typeof i === 'string') {
+	i = i.split(',');
+}
+if (typeof u === 'string') {
+	u = u.split(',');
+}
 
 var git = read(gitignore);
 var npm = read(npmignore);
@@ -38,7 +55,11 @@ var npm = read(npmignore);
 // Parse the files and create a new `.npmignore` file
 // based on the given arguments along with data that
 // is already present in either or both files.
-var res = parser(npm, git, {ignore: i, unignore: u, keepdest: keepdest});
+var res = parser(npm, git, {
+	ignore: i,
+	keepdest: keepdest,
+	unignore: u,
+});
 
 // write the file.
 fs.writeFileSync(dest, res);
@@ -46,16 +67,3 @@ fs.writeFileSync(dest, res);
 console.log();
 log.inform('updated', dest);
 log.success('  Done.');
-
-function read(fp) {
-	if (fp.indexOf(',') > -1) {
-		return fp.split(/,/g).map(read).join('\n');
-	}
-	if (!path.isAbsolute(fp)) {
-		fp = path.join(process.cwd(), fp);
-	}
-	if (!fs.existsSync(fp)) {
-		return null;
-	}
-	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
-}

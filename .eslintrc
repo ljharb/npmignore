@@ -1,0 +1,13 @@
+{
+	"root": true,
+
+	"extends": "@ljharb/eslint-config/node/0.4",
+
+	"rules": {
+		"eqeqeq": ["error", "allow-null"],
+		"func-style": "warn",
+		"multiline-comment-style": "off",
+		"no-param-reassign": "warn",
+		"no-plusplus": "warn",
+	},
+}
