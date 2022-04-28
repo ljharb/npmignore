@@ -38,8 +38,8 @@ module.exports = function npmignore(npm, git, options) {
 	}
 
 	if (options.unignore) {
-		git = diff(git, arrayify(options.unignore));
-		npm = diff(npm, arrayify(options.unignore));
+		git = diff(git, [].concat(options.unignore));
+		npm = diff(npm, [].concat(options.unignore));
 	}
 
 	// Remove the comment, we re-add later
@@ -47,7 +47,7 @@ module.exports = function npmignore(npm, git, options) {
 	npm = diff(npm, git);
 
 	if (options.ignore) {
-		npm = npm.concat(arrayify(options.ignore));
+		npm = npm.concat([].concat(options.ignore));
 	}
 
 	return format(git, uniq(npm));
@@ -170,16 +170,4 @@ function diff(arr, remove) {
 	}
 
 	return res;
-}
-
-/**
- * Coerce the value to an array.
- *
- * @param  {*} val
- * @return {Array}
- * @api private
- */
-
-function arrayify(val) {
-	return Array.isArray(val) ? val : [val];
 }
