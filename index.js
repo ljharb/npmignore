@@ -1,10 +1,7 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
 var uniq = require('array-uniq');
+
 var comment = [
 	'# npmignore - content above this line is automatically generated and modifications may be omitted',
 	'# see npmjs.com/npmignore for more details.',
@@ -17,22 +14,22 @@ var re = /#\s*npmignore/;
  * comments (expcted output).
  *
  * @param  {String} `str`
- * @return {Array}
+ * @return {String}
  * @api private
  */
 
-function format(git, npm) {
-	git = Array.isArray(git) ? git.join('\n') : git;
-	npm = Array.isArray(npm) ? npm.join('\n') : npm;
+function format(git, npm, commentStr) {
+	var gitStr = [].concat(git).join('\n');
+	var npmStr = [].concat(npm).join('\n');
 
 	var res = '';
 
-	if (git) {
-		res += git;
+	if (gitStr) {
+		res += gitStr;
 	}
 
-	if (npm) {
-		res += '\n\n' + comment + '\n' + npm;
+	if (npmStr) {
+		res += '\n\n' + commentStr + '\n' + npmStr;
 	}
 
 	return res;
@@ -42,7 +39,7 @@ function format(git, npm) {
  * Normalize newlines and split the string into an array.
  *
  * @param  {String} `str`
- * @return {Array}
+ * @return {String[]}
  * @api private
  */
 
@@ -88,11 +85,11 @@ function diff(arr, remove) {
  * Extract relevant lines from `.npmignore`
  *
  * @param  {String} `npmignore` string
- * @return {Array} Array of lines
+ * @return {String[]} Array of lines
  */
 
 function extract(npmignore, options) {
-	if (npmignore == null) {
+	if (typeof npmignore !== 'string') {
 		throw new TypeError('npmignore expects a string.');
 	}
 
@@ -102,13 +99,12 @@ function extract(npmignore, options) {
 		return lines;
 	}
 
-	var len = lines.length;
 	var npmignored = false;
 	var git = [];
 	var npm = [];
 	var i = 0;
 
-	while (i < len) {
+	while (i < lines.length) {
 		var line = lines[i++];
 		if (re.test(line)) {
 			npmignored = true;
@@ -141,29 +137,25 @@ module.exports = function npmignore(npm, git, options) {
 
 	options = options || {};
 
-	if (typeof git === 'string') {
-		git = split(git);
-	}
+	var gitLines = typeof git === 'string' ? split(git) : git;
 
 	// get the relevant lines from `.npmignore`
-	if (typeof npm === 'string') {
-		npm = extract(npm, { npmignored: options.keepdest });
-	}
+	var npmLines = typeof npm === 'string' ? extract(npm, { npmignored: options.keepdest }) : npm;
 
 	if (options.unignore) {
-		git = diff(git, [].concat(options.unignore));
-		npm = diff(npm, [].concat(options.unignore));
+		gitLines = diff(gitLines, [].concat(options.unignore));
+		npmLines = diff(npmLines, [].concat(options.unignore));
 	}
 
 	// Remove the comment, we re-add later
-	npm = diff(npm, comment.concat('#npmignore # npmignore'));
-	npm = diff(npm, git);
+	var npmLinesNoComment = diff(npmLines, comment + '#npmignore # npmignore');
+	npmLines = diff(npmLinesNoComment, gitLines);
 
 	if (options.ignore) {
-		npm = npm.concat([].concat(options.ignore));
+		npmLines = npmLines.concat([].concat(options.ignore));
 	}
 
-	return format(git, uniq(npm));
+	return format(gitLines, uniq(npmLines), comment);
 };
 
 /**
