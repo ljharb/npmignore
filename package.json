@@ -2,9 +2,7 @@
 	"name": "npmignore",
 	"version": "0.2.0",
 	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
-	"bin": {
-		"npmignore": "./cli.js"
-	},
+	"bin": "./bin/npmignore",
 	"main": "index.js",
 	"scripts": {
 		"lint": "eslint --ext=js,mjs .",

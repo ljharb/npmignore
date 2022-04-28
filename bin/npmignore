@@ -6,7 +6,7 @@ var fs = require('fs');
 var path = require('path');
 var log = require('verbalize');
 var argv = require('minimist')(process.argv.slice(2));
-var parser = require('./');
+var parser = require('../');
 
 log.runner = 'npmignore';
 
