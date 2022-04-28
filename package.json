@@ -1,32 +1,34 @@
 {
 	"name": "npmignore",
-	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
 	"version": "0.2.0",
-	"homepage": "https://github.com/ljharb/npmignore",
-	"author": {
-		"name": "Jordan Harband",
-		"url": "https://github.com/ljharb"
+	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
+	"bin": {
+		"npmignore": "./cli.js"
+	},
+	"main": "index.js",
+	"scripts": {
 	},
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/ljharb/npmignore.git"
 	},
+	"keywords": [
+		"npmignore",
+		"gitignore"
+	],
+	"author": "Jordan Harband <ljharb@gmail.com>",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/ljharb/npmignore/issues"
 	},
-	"license": "MIT",
+	"homepage": "https://github.com/ljharb/npmignore",
+	"engines": {
+		"node": ">=0.10.0"
+	},
 	"files": [
 		"index.js",
 		"cli.js"
 	],
-	"main": "index.js",
-	"preferGlobal": true,
-	"bin": {
-		"npmignore": "./cli.js"
-	},
-	"engines": {
-		"node": ">=0.10.0"
-	},
 	"dependencies": {
 		"array-uniq": "^1.0.1",
 		"minimist": "^1.1.0",
