@@ -1,41 +1,41 @@
 {
-  "name": "npmignore",
-  "description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
-  "version": "0.2.0",
-  "homepage": "https://github.com/jonschlinkert/npmignore",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/npmignore.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jonschlinkert/npmignore/issues"
-  },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/jonschlinkert/npmignore/blob/master/LICENSE"
-  },
-  "files": [
-    "index.js",
-    "cli.js"
-  ],
-  "main": "index.js",
-  "preferGlobal": true,
-  "bin": {
-    "npmignore": "./cli.js"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "dependencies": {
-    "array-uniq": "^1.0.1",
-    "minimist": "^1.1.0",
-    "verbalize": "^0.1.2"
-  },
-  "devDependencies": {
-    "verb": "0.6.2"
-  }
+	"name": "npmignore",
+	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
+	"version": "0.2.0",
+	"homepage": "https://github.com/jonschlinkert/npmignore",
+	"author": {
+		"name": "Jon Schlinkert",
+		"url": "https://github.com/jonschlinkert"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/jonschlinkert/npmignore.git"
+	},
+	"bugs": {
+		"url": "https://github.com/jonschlinkert/npmignore/issues"
+	},
+	"license": {
+		"type": "MIT",
+		"url": "https://github.com/jonschlinkert/npmignore/blob/master/LICENSE"
+	},
+	"files": [
+		"index.js",
+		"cli.js"
+	],
+	"main": "index.js",
+	"preferGlobal": true,
+	"bin": {
+		"npmignore": "./cli.js"
+	},
+	"engines": {
+		"node": ">=0.10.0"
+	},
+	"dependencies": {
+		"array-uniq": "^1.0.1",
+		"minimist": "^1.1.0",
+		"verbalize": "^0.1.2"
+	},
+	"devDependencies": {
+		"verb": "0.6.2"
+	}
 }

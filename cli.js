@@ -48,14 +48,14 @@ log.inform('updated', dest);
 log.success('  Done.');
 
 function read(fp) {
-  if (fp.indexOf(',') > -1) {
-    return fp.split(/,/g).map(read).join('\n');
-  }
-  if (!path.isAbsolute(fp)) {
-    fp = path.join(process.cwd(), fp);
-  }
-  if (!fs.existsSync(fp)) {
-    return null;
-  }
-  return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
+	if (fp.indexOf(',') > -1) {
+		return fp.split(/,/g).map(read).join('\n');
+	}
+	if (!path.isAbsolute(fp)) {
+		fp = path.join(process.cwd(), fp);
+	}
+	if (!fs.existsSync(fp)) {
+		return null;
+	}
+	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }

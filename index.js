@@ -6,8 +6,8 @@
 
 var uniq = require('array-uniq');
 var comment = [
-  '# npmignore - content above this line is automatically generated and modifications may be omitted',
-  '# see npmjs.com/npmignore for more details.'
+	'# npmignore - content above this line is automatically generated and modifications may be omitted',
+	'# see npmjs.com/npmignore for more details.'
 ].join('\n');
 var re = /#\s*npmignore/;
 
@@ -21,36 +21,36 @@ var re = /#\s*npmignore/;
  */
 
 module.exports = function npmignore(npm, git, options) {
-  if (typeof git !== 'string') {
-    options = git;
-    git = '';
-  }
+	if (typeof git !== 'string') {
+		options = git;
+		git = '';
+	}
 
-  options = options || {};
+	options = options || {};
 
-  if (typeof git === 'string') {
-    git = split(git);
-  }
+	if (typeof git === 'string') {
+		git = split(git);
+	}
 
-  // get the relevant lines from `.npmignore`
-  if (typeof npm === 'string') {
-    npm = extract(npm, {npmignored: options.keepdest});
-  }
+	// get the relevant lines from `.npmignore`
+	if (typeof npm === 'string') {
+		npm = extract(npm, {npmignored: options.keepdest});
+	}
 
-  if (options.unignore) {
-    git = diff(git, arrayify(options.unignore));
-    npm = diff(npm, arrayify(options.unignore));
-  }
+	if (options.unignore) {
+		git = diff(git, arrayify(options.unignore));
+		npm = diff(npm, arrayify(options.unignore));
+	}
 
-  // Remove the comment, we re-add later
-  npm = diff(npm, comment.concat('#npmignore # npmignore'));
-  npm = diff(npm, git);
+	// Remove the comment, we re-add later
+	npm = diff(npm, comment.concat('#npmignore # npmignore'));
+	npm = diff(npm, git);
 
-  if (options.ignore) {
-    npm = npm.concat(arrayify(options.ignore));
-  }
+	if (options.ignore) {
+		npm = npm.concat(arrayify(options.ignore));
+	}
 
-  return format(git, uniq(npm));
+	return format(git, uniq(npm));
 }
 
 /**
@@ -61,36 +61,36 @@ module.exports = function npmignore(npm, git, options) {
  */
 
 function extract(npmignore, options) {
-  if (npmignore == null) {
-    throw new TypeError('npmignore expects a string.');
-  }
+	if (npmignore == null) {
+		throw new TypeError('npmignore expects a string.');
+	}
 
-  var lines = split(npmignore);
+	var lines = split(npmignore);
 
-  if (options.npmignored) {
-	  return lines;
-  }
+	if (options.npmignored) {
+		return lines;
+	}
 
-  var len = lines.length;
-  var npmignored = false;
-  var git = [];
-  var npm = [];
-  var i = 0;
+	var len = lines.length;
+	var npmignored = false;
+	var git = [];
+	var npm = [];
+	var i = 0;
 
-  while (i < len) {
-    var line = lines[i++];
-    if (!npmignored && re.test(line)) {
-      npmignored = true;
-    }
+	while (i < len) {
+		var line = lines[i++];
+		if (re.test(line)) {
+			npmignored = true;
+		}
 
-    if (npmignored) {
-      npm.push(line);
-    } else {
-      git.push(line);
-    }
-  }
+		if (npmignored) {
+			npm.push(line);
+		} else {
+			git.push(line);
+		}
+	}
 
-  return npm;
+	return npm;
 }
 
 /**
@@ -110,25 +110,24 @@ module.exports.extract = extract;
  */
 
 function format(git, npm) {
-  git = Array.isArray(git) ? git.join('\n') : git;
-  npm = Array.isArray(npm) ? npm.join('\n') : npm;
+	git = Array.isArray(git) ? git.join('\n') : git;
+	npm = Array.isArray(npm) ? npm.join('\n') : npm;
 
-  var res = '';
+	var res = '';
 
-  if (git) {
-    res += git;
-  }
+	if (git) {
+		res += git;
+	}
 
-  if (npm) {
-    res += '\n\n' + comment + '\n'+ npm;
-  }
+	if (npm) {
+		res += '\n\n' + comment + '\n'+ npm;
+	}
 
-  return res;
+	return res;
 }
 
 /**
- * Normalize newlines and split the string
- * into an array.
+ * Normalize newlines and split the string into an array.
  *
  * @param  {String} `str`
  * @return {Array}
@@ -136,14 +135,13 @@ function format(git, npm) {
  */
 
 function split(str) {
-  return (str || '\n\n')
-    .replace(/\r/g, '')
-    .split('\n');
+	return (str || '\n\n')
+		.replace(/\r/g, '')
+		.split('\n');
 }
 
 /**
- * Remove unwanted elements and uniquify the
- * given `array`.
+ * Remove unwanted elements and uniquify the given `array`.
  *
  * @param  {Array} `array` The array to uniquify
  * @return {Array} `remove` Array of elements to remove
@@ -151,27 +149,27 @@ function split(str) {
  */
 
 function diff(arr, remove) {
-  if (arr == null) {
-    return [];
-  }
+	if (arr == null) {
+		return [];
+	}
 
-  if (remove == null) {
-    return arr;
-  }
+	if (remove == null) {
+		return arr;
+	}
 
-  var res = [];
-  var len = arr.length;
-  var i = 0;
+	var res = [];
+	var len = arr.length;
+	var i = 0;
 
-  while (i < len) {
-    var ele = arr[i++];
+	while (i < len) {
+		var ele = arr[i++];
 
-    if (remove.indexOf(ele) === -1) {
-      res.push(ele);
-    }
-  }
+		if (remove.indexOf(ele) === -1) {
+			res.push(ele);
+		}
+	}
 
-  return res;
+	return res;
 }
 
 /**
@@ -183,5 +181,5 @@ function diff(arr, remove) {
  */
 
 function arrayify(val) {
-  return Array.isArray(val) ? val : [val];
+	return Array.isArray(val) ? val : [val];
 }
