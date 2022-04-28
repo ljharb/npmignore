@@ -25,10 +25,6 @@
 	"engines": {
 		"node": ">=0.10.0"
 	},
-	"files": [
-		"index.js",
-		"cli.js"
-	],
 	"dependencies": {
 		"array-uniq": "^1.0.1",
 		"minimist": "^1.1.0",
