@@ -31,7 +31,7 @@
 	},
 	"dependencies": {
 		"array-uniq": "^1.0.1",
-		"minimist": "^1.1.0",
+		"minimist": "^1.2.6",
 		"verbalize": "^0.1.2"
 	},
 	"devDependencies": {
