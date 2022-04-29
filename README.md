@@ -2,43 +2,78 @@
 
 > Command line tool for creating or updating a .npmignore file based on .gitignore.
 
-## Install globally with [npm](npmjs.org):
-
-```bash
-npm i -g npmignore
-```
-
 ## Usage
 
 Say `.gitignore` has:
 
 ```bash
-node_modules
-test/actual
+node_modules/
+build/
 ```
 
-And you want `.npmignore` to have:
+… so that build output is not committed, and you want `.npmignore` to have:
 
 ```bash
-node_modules
-test/actual
-test/fixtures
+node_modules/
+src/
+test/
+```
+… so that source files and test files are not published, but build output is.
+
+### Automatic usage
+
+On the command line, run `npm install --save-dev npmignore`.
+
+In your `.gitignore`, add `.npmignore` so that the `.npmignore` file is no longer committed to version control.
+
+In your `package.json`, add the following JSON to “scripts” and “publishConfig”:
+```json
+"scripts": {
+    …
+    "prepack": "npmignore --auto"
+    …
+},
+"publishConfig": {
+    …
+    "ignore": [
+        "!build/",
+        "src/",
+        "test/"
+    ]
+    …
+}
 ```
 
-In the command line run:
+Whenever you run `npm pack` or `npm publish`, an `.npmignore` file will automatically be created:
 
 ```bash
-npmignore "test/fixtures"
+node_modules/
+build/
+
+# npmignore
+!build/
+src/
+test/
+```
+
+### Manual usage
+
+On the command line run:
+
+```bash
+npx npmignore -i src/,test/,!build/
 ```
 
 An `.npmignore` file will be created, or updated:
 
 ```bash
-node_modules
-test/actual
+node_modules/
+build/
 
 # npmignore
-test/fixtures
+!build/
+src/
+test/
 ```
 
 **Heads up!**
@@ -47,8 +82,13 @@ The `# npmignore` comment is used to ensure that `.npmignore` reflects the lates
 
 _If you want to preserve everything in your `.npmignore` file, regardless of what is in `.gitignore`, just add the `# npmignore` comment at the top of the `.npmignore` file.
 
+### Verification
+
+Run `npm pack --dry-run` (or `npm publish --dry-run`) in a modern version of npm to get a printout of the files that will be included in your npm package.
+
 ## CLI commands
 
+ - `--auto`: automatic mode. The `--ignore`, `--unignore`, `keepdest`, and `--npmignore` options are incompatible with this mode.
  - `-i`|`--ignore`: comma-separated list of patterns to add to `.npmignore`
  - `-u`|`--unignore`: comma-separated list of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`.
  - `-d`|`--dest`: optionally define a different destination filepath. Good for test driving to see what will be generated in advance.
@@ -61,13 +101,14 @@ _If you want to preserve everything in your `.npmignore` file, regardless of wha
 To use via API, first:
 
 ```bash
-npm i npmignore --save
+npm install --save npmignore
 ```
 
 Then:
 
 ```js
 var npmignore = require('npmignore');
+
 npmignore(npm, git, options);
 ```
 
@@ -80,12 +121,8 @@ npmignore(npm, git, options);
     + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
     + `keepdest` if `true`, avoids altering the destination file
 
-## Run tests
-Install dev dependencies.
-
-```bash
-npm i -d && npm test
-```
+## Tests
+Simply clone the repo, `npm install`, and run `npm test`
 
 ## Contributing
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/ljharb/npmignore/issues)

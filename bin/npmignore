@@ -25,7 +25,8 @@ function read(fp) {
  */
 
 var gitignore = argv.g || argv.gitignore || '.gitignore';
-var npmignore = argv.n || argv.npmignore || '.npmignore';
+var npmignoreArg = argv.n || argv.npmignore;
+var npmignore = npmignoreArg || '.npmignore';
 
 // optionally specify a different destination
 var dest = argv.d || argv.dest || npmignore;
@@ -39,15 +40,52 @@ var i = argv.i || argv.ignore;
 // patterns to un-ignore
 var u = argv.u || argv.unignore;
 
-if (typeof i === 'string') {
-	i = i.split(',');
-}
-if (typeof u === 'string') {
-	u = u.split(',');
-}
+var auto = !!argv.auto;
 
 var git = read(gitignore);
-var npm = read(npmignore);
+var npm = auto ? '' : read(npmignore);
+
+if (auto) {
+	var gitignoreLines = git.split('\n').slice(1);
+
+	if (i || u || npmignoreArg || keepdest) {
+		console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
+		process.exit(1);
+	}
+
+	var npmignoreIgnored = gitignoreLines.some(function (x) {
+		return (/^\s*\.npmignore\s*($|#)/).test(x);
+	});
+	if (!npmignoreIgnored) {
+		console.error('in `--auto` mode, `.gitignore` must contain `.npmignore`');
+		process.exit(1);
+	}
+
+	if (fs.existsSync(dest)) {
+		fs.unlinkSync(dest); // remove existing npmignore file
+	}
+
+	var pkgPath = path.join(process.cwd(), 'package.json');
+	var publishConfig = JSON.parse(fs.readFileSync(pkgPath)).publishConfig;
+	if (!publishConfig) {
+		console.warn('no `publishConfig` in `package.json`');
+	} else if (Object.prototype.hasOwnProperty.call(publishConfig, 'ignore') && !Array.isArray(publishConfig.ignore)) {
+		console.error('`publishConfig.ignore` in `package.json` is not an array');
+		process.exit(2);
+	}
+	i = publishConfig && publishConfig.ignore;
+	if (!i) {
+		console.warn('no npmignore diff to write; exiting');
+		process.exit();
+	}
+} else {
+	if (typeof i === 'string') {
+		i = i.split(',');
+	}
+	if (typeof u === 'string') {
+		u = u.split(',');
+	}
+}
 
 // Parse the files and create a new `.npmignore` file
 // based on the given arguments along with data that
@@ -61,4 +99,8 @@ var res = parser(npm, git, {
 // write the file.
 fs.writeFileSync(dest, res);
 
-console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
+if (auto) {
+	console.log('read ' + gitignore + ' and `package.json` `publishConfig.ignore`, updated ' + dest);
+} else {
+	console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
+}
