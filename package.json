@@ -4,6 +4,10 @@
 	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
 	"bin": "./bin/npmignore",
 	"main": "index.js",
+	"exports": {
+		".": "./index.js",
+		"./package.json": "./package.json"
+	},
 	"scripts": {
 		"prepack": "./bin/npmignore --auto",
 		"prepublishOnly": "safe-publish-latest",

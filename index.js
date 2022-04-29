@@ -67,8 +67,9 @@ function split(str) {
 /**
  * Remove unwanted elements and uniquify the given `array`.
  *
- * @param  {Array} `array` The array to uniquify
- * @return {Array} `remove` Array of elements to remove
+ * @param {string[]} `arr` The array to uniquify
+ * @param {string[] | string} `remove` elements to remove
+ * @return {string[]} Filtered array
  * @api private
  */
 
