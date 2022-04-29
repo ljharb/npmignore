@@ -28,7 +28,6 @@
 		"node": ">=0.10.0"
 	},
 	"dependencies": {
-		"array-uniq": "^1.0.1",
 		"minimist": "^1.2.6"
 	},
 	"devDependencies": {

@@ -1,12 +1,27 @@
 'use strict';
 
-var uniq = require('array-uniq');
-
 var comment = [
 	'# npmignore - content above this line is automatically generated and modifications may be omitted',
 	'# see npmjs.com/npmignore for more details.',
 ].join('\n');
 var re = /#\s*npmignore/;
+
+/**
+ * @param {string[]} `arr`
+ * @returns {string[]} uniquified array
+ */
+function uniq(arr) {
+	var obj = {};
+	var res = [];
+	for (var i = 0; i < arr.length; i += 1) {
+		var key = '$' + arr[i];
+		if (!(key in obj)) {
+			res.push(arr[i]);
+			obj[key] = true;
+		}
+	}
+	return res;
+}
 
 /**
  * Rebuild array back into newline delimited,
