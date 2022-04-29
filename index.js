@@ -47,7 +47,7 @@ function format(git, npm, commentStr) {
 		res += '\n\n' + commentStr + '\n' + npmStr;
 	}
 
-	return res;
+	return res.replace(/\n?$/, '\n');
 }
 
 /**

@@ -21,13 +21,13 @@ test('npmignore', function (t) {
 
 	t.equal(
 		npmignore('', gitignore, { ignore: 'a\nb\npids' }).replace(gitignore, function () { return gitignoreTOKEN; }),
-		gitignoreTOKEN + preamble + 'a\nb\npids',
+		gitignoreTOKEN + preamble + 'a\nb\npids\n',
 		'empty npmignore content, ignore option, yields expected gitignore'
 	);
 
 	t.equal(
 		npmignore(gitignore + preamble + 'a\nb\npids', gitignore, { ignore: 'a\nb' }).replace(gitignore, function () { return gitignoreTOKEN; }),
-		gitignoreTOKEN + preamble + 'a\nb',
+		gitignoreTOKEN + preamble + 'a\nb\n',
 		'initial npmignore content, ignore option that should cause a removal, yields expected gitignore'
 	);
 
