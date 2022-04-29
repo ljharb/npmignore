@@ -88,18 +88,7 @@ npm i -d && npm test
 ```
 
 ## Contributing
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/npmignore/issues)
-
-## Author
-
-**Jon Schlinkert**
- 
-+ [github/jonschlinkert](https://github.com/jonschlinkert)
-+ [twitter/jonschlinkert](http://twitter.com/jonschlinkert) 
-
-## License
-Copyright (c) 2015 Jon Schlinkert  
-Released under the MIT license
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/ljharb/npmignore/issues)
 
 ***
 

@@ -2,22 +2,19 @@
 	"name": "npmignore",
 	"description": "Command line tool for creating or updating a .npmignore file based on .gitignore.",
 	"version": "0.2.0",
-	"homepage": "https://github.com/jonschlinkert/npmignore",
+	"homepage": "https://github.com/ljharb/npmignore",
 	"author": {
-		"name": "Jon Schlinkert",
-		"url": "https://github.com/jonschlinkert"
+		"name": "Jordan Harband",
+		"url": "https://github.com/ljharb"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/jonschlinkert/npmignore.git"
+		"url": "git://github.com/ljharb/npmignore.git"
 	},
 	"bugs": {
-		"url": "https://github.com/jonschlinkert/npmignore/issues"
+		"url": "https://github.com/ljharb/npmignore/issues"
 	},
-	"license": {
-		"type": "MIT",
-		"url": "https://github.com/jonschlinkert/npmignore/blob/master/LICENSE"
-	},
+	"license": "MIT",
 	"files": [
 		"index.js",
 		"cli.js"
