@@ -25,6 +25,9 @@
 		"gitignore"
 	],
 	"author": "Jordan Harband <ljharb@gmail.com>",
+	"funding": {
+		"url": "https://github.com/sponsors/ljharb"
+	},
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/ljharb/npmignore/issues"
@@ -55,7 +58,8 @@
 	},
 	"publishConfig": {
 		"ignore": [
-			".verb.md"
+			".verb.md",
+			".github/workflows"
 		]
 	}
 }
