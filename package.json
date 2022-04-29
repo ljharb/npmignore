@@ -29,13 +29,11 @@
 	},
 	"dependencies": {
 		"array-uniq": "^1.0.1",
-		"minimist": "^1.2.6",
-		"verbalize": "^0.1.2"
+		"minimist": "^1.2.6"
 	},
 	"devDependencies": {
 		"@ljharb/eslint-config": "^21.0.0",
 		"eslint": "=8.8.0",
-		"tape": "^5.5.3",
-		"verb": "0.6.2"
+		"tape": "^5.5.3"
 	}
 }

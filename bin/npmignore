@@ -4,11 +4,8 @@
 
 var fs = require('fs');
 var path = require('path');
-var log = require('verbalize');
 var argv = require('minimist')(process.argv.slice(2));
 var parser = require('../');
-
-log.runner = 'npmignore';
 
 function read(fp) {
 	if (fp.indexOf(',') > -1) {
@@ -64,6 +61,4 @@ var res = parser(npm, git, {
 // write the file.
 fs.writeFileSync(dest, res);
 
-console.log();
-log.inform('updated', dest);
-log.success('  Done.');
+console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
