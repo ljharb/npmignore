@@ -28,6 +28,8 @@ var gitignore = argv.g || argv.gitignore || '.gitignore';
 var npmignoreArg = argv.n || argv.npmignore;
 var npmignore = npmignoreArg || '.npmignore';
 
+var commentLines = typeof argv.commentLines === 'string' ? argv.commentLines.split(',') : undefined;
+
 // optionally specify a different destination
 var dest = argv.d || argv.dest || npmignore;
 
@@ -91,6 +93,7 @@ if (auto) {
 // based on the given arguments along with data that
 // is already present in either or both files.
 var res = parser(npm, git, {
+	commentLines: commentLines,
 	ignore: i,
 	keepdest: keepdest,
 	unignore: u,

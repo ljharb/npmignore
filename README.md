@@ -95,6 +95,7 @@ Run `npm pack --dry-run` (or `npm publish --dry-run`) in a modern version of npm
  - `-g`|`--gitignore`: alternate source filepath for `.gitignore`.
  - `-n`|`--npmignore`: alternate source filepath for `.npmignore`.
  - `-k`|`--keepdest`: avoids altering the destination file
+ - `--commentLines`: a comma-separated list of lines of comment text.
 
 ## API
 
@@ -117,6 +118,13 @@ npmignore(npm, git, options);
  - `npm` {String|Array}: String from `.npmignore` or an array of patterns to use.
  - `git` {String|Array}: String from `.gitignore` or an array of patterns to use.
  - `options` {Object}
+    + `commentLines` Array of comment lines. Defaults to:
+        ```
+        [
+            'content above this line is automatically generated and modifications may be omitted',
+            'see npmjs.com/npmignore for more details.'
+        ]
+        ```
     + `ignore` Array of patterns to add to the existing patterns from `.gitignore`
     + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
     + `keepdest` if `true`, avoids altering the destination file

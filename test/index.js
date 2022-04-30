@@ -31,5 +31,19 @@ test('npmignore', function (t) {
 		'initial npmignore content, ignore option that should cause a removal, yields expected gitignore'
 	);
 
+	var shortPreamble = '\n\n# npmignore - content below this line is automatically generated and modifications may be omitted\n';
+	t.equal(
+		npmignore(
+			gitignore + shortPreamble + 'a\nb\npids',
+			gitignore,
+			{
+				commentLines: ['content below this line is automatically generated and modifications may be omitted'],
+				ignore: 'a\nb',
+			}
+		).replace(gitignore, function () { return gitignoreTOKEN; }),
+		gitignoreTOKEN + shortPreamble + 'a\nb\n',
+		'initial npmignore content, ignore option that should cause a removal, with custom comment lines, yields expected gitignore'
+	);
+
 	t.end();
 });

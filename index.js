@@ -1,9 +1,10 @@
 'use strict';
 
-var comment = [
-	'# npmignore - content above this line is automatically generated and modifications may be omitted',
-	'# see npmjs.com/npmignore for more details.',
-].join('\n');
+var defaultCommentLines = [
+	'content above this line is automatically generated and modifications may be omitted',
+	'see npmjs.com/npmignore for more details.',
+];
+var commentPreamble = 'npmignore - ';
 var re = /#\s*npmignore/;
 
 /**
@@ -157,6 +158,14 @@ module.exports = function npmignore(npm, git, options) {
 
 	// get the relevant lines from `.npmignore`
 	var npmLines = typeof npm === 'string' ? extract(npm, { npmignored: options.keepdest }) : npm;
+
+	if (typeof options.commentLines !== 'undefined' && !Array.isArray(options.commentLines)) {
+		throw new TypeError('`commentLines` option, when provided, must be an array');
+	}
+	var commentLines = options.commentLines || defaultCommentLines;
+	var comment = commentLines.map(function (line, i) {
+		return '# ' + (i === 0 ? commentPreamble : '') + line;
+	}).join('\n');
 
 	if (options.unignore) {
 		gitLines = diff(gitLines, [].concat(options.unignore));
