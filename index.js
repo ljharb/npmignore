@@ -62,7 +62,7 @@ module.exports = function npmignore(npm, git, options) {
 
 function extract(npmignore, options) {
   if (npmignore == null) {
-    throw new Error('npmignore expects a string.');
+    throw new TypeError('npmignore expects a string.');
   }
 
   var lines = split(npmignore);
