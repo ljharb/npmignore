@@ -41,7 +41,7 @@
 		"node": ">=0.10.0"
 	},
 	"dependencies": {
-		"minimist": "^1.2.6"
+		"minimist": "^1.2.7"
 	},
 	"devDependencies": {
 		"@ljharb/eslint-config": "^21.0.0",
