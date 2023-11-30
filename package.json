@@ -44,14 +44,14 @@
 		"minimist": "^1.2.7"
 	},
 	"devDependencies": {
-		"@ljharb/eslint-config": "^21.0.0",
-		"aud": "^2.0.1",
+		"@ljharb/eslint-config": "^21.1.0",
+		"aud": "^2.0.3",
 		"auto-changelog": "^2.4.0",
 		"eslint": "=8.8.0",
 		"in-publish": "^2.0.1",
 		"nyc": "^10.3.2",
 		"safe-publish-latest": "^2.0.0",
-		"tape": "^5.6.1"
+		"tape": "^5.7.2"
 	},
 	"auto-changelog": {
 		"output": "CHANGELOG.md",
