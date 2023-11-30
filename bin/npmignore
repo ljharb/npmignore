@@ -48,6 +48,10 @@ var git = read(gitignore);
 var npm = auto ? '' : read(npmignore);
 
 if (auto) {
+	if (!git) {
+		console.error('gitignore file not found (tried `' + gitignore + '`)');
+		process.exit(1);
+	}
 	var gitignoreLines = git.split('\n').slice(1);
 
 	if (i || u || npmignoreArg || keepdest) {
