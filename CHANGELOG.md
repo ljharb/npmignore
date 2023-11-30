@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.1](https://github.com/ljharb/npmignore/compare/v0.3.0...v0.3.1) - 2023-11-29
+
+### Commits
+
+- [meta] update editorconfig [`c4b7754`](https://github.com/ljharb/npmignore/commit/c4b7754e5606dab85cd47c3b56f9b9727d74d422)
+- [actions] remove redundant workflow [`fcdc202`](https://github.com/ljharb/npmignore/commit/fcdc20233614a96f0567dc7b44887ff0cbcaa25a)
+- [Tests] add `nyc` [`98ec251`](https://github.com/ljharb/npmignore/commit/98ec251599e6c499d165cf5d5e8c5329e1f99f91)
+- [actions] update rebase action [`cd7cc76`](https://github.com/ljharb/npmignore/commit/cd7cc76a41c009162a080f1fabaa5f8329de306c)
+- [Dev Deps] update `@ljharb/eslint-config`, `aud`, `tape` [`79e56a5`](https://github.com/ljharb/npmignore/commit/79e56a505cb1660bcb1449504e18b965400b8140)
+- [Fix] better error message when gitignore is not found [`3cad507`](https://github.com/ljharb/npmignore/commit/3cad5072204c6406257c07d54e960fe2099ba0a6)
+- [Dev Deps] update `aud`, `tape` [`cba23fc`](https://github.com/ljharb/npmignore/commit/cba23fc43d05b866c8bf87d305b6321c97c5768f)
+- [Deps] update `minimist` [`56cac61`](https://github.com/ljharb/npmignore/commit/56cac61f9ed425459607f71f95ec4aabb4198795)
+- [Deps] update `minimist` [`a96fc20`](https://github.com/ljharb/npmignore/commit/a96fc2032e3e8d4bc16b66d02ea6db890834b85f)
+
 ## [v0.3.0](https://github.com/ljharb/npmignore/compare/v0.2.0...v0.3.0) - 2022-05-04
 
 ### Merged
