@@ -79,6 +79,7 @@ function diff(arr, remove) {
 		return [];
 	}
 
+	// istanbul ignore if - Defensive code: all internal calls to diff pass non-null second argument
 	if (remove == null) {
 		return arr;
 	}
@@ -154,6 +155,7 @@ module.exports = function npmignore(npm, git, options) {
 
 	options = options || {};
 
+	// istanbul ignore next - Defensive code: git is always normalized to string at line 152 if not already a string
 	var gitLines = typeof git === 'string' ? split(git) : git;
 
 	// get the relevant lines from `.npmignore`
