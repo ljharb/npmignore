@@ -4,7 +4,10 @@
 
 var fs = require('fs');
 var path = require('path');
+var execSync = require('child_process').execSync;
 var argv = require('minimist')(process.argv.slice(2));
+var hasOwn = require('hasown');
+
 var parser = require('../');
 
 function read(fp) {
@@ -20,9 +23,71 @@ function read(fp) {
 	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
 
-/**
- * Find the local `ignore` files we need
- */
+function getGitIgnoredFiles(excludeArgs) {
+	try {
+		var result = execSync(
+			'git ls-files --others --ignored ' + excludeArgs,
+			{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+		);
+		return result.split('\n').filter(function (line) {
+			return line.length > 0;
+		});
+	} catch (e) {
+		return [];
+	}
+}
+
+function minimizeGlobPatterns(files) {
+	if (files.length === 0) {
+		return [];
+	}
+
+	var dirSet = {};
+	var topLevelFiles = [];
+
+	for (var i = 0; i < files.length; i++) {
+		var file = files[i];
+		var firstSlash = file.indexOf('/');
+
+		if (firstSlash === -1) {
+			// Top-level file with no directory
+			topLevelFiles[topLevelFiles.length] = file;
+		} else {
+			// Extract first directory component
+			var topDir = file.slice(0, firstSlash);
+			dirSet[topDir] = true;
+		}
+	}
+
+	var patterns = [];
+
+	// Add directory patterns
+	for (var dir in dirSet) { // eslint-disable-line no-restricted-syntax
+		if (hasOwn(dirSet, dir)) {
+			patterns[patterns.length] = dir + '/';
+		}
+	}
+
+	return patterns.concat(topLevelFiles);
+}
+
+function computeGloballyIgnoredFiles() {
+	// get all ignored files (local + global gitignore)
+	var allIgnored = getGitIgnoredFiles('--exclude-standard');
+
+	// get only locally ignored files
+	var locallyIgnored = getGitIgnoredFiles('--exclude-from=.gitignore');
+
+	// Compute the difference: files in allIgnored but not in locallyIgnored
+	var globallyIgnored = [];
+	for (var i = 0; i < allIgnored.length; i++) {
+		if (locallyIgnored.indexOf(allIgnored[i]) === -1) {
+			globallyIgnored[globallyIgnored.length] = allIgnored[i];
+		}
+	}
+
+	return minimizeGlobPatterns(globallyIgnored);
+}
 
 var gitignore = argv.g || argv.gitignore || '.gitignore';
 var npmignoreArg = argv.n || argv.npmignore;
@@ -80,6 +145,12 @@ if (auto) {
 		process.exit(2);
 	}
 	i = publishConfig && publishConfig.ignore;
+
+	var globallyIgnored = computeGloballyIgnoredFiles();
+	if (globallyIgnored.length > 0) {
+		i = (i || []).concat(globallyIgnored);
+	}
+
 	if (!i) {
 		console.warn('no npmignore diff to write; exiting');
 		process.exit();

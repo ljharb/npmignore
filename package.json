@@ -41,6 +41,7 @@
 		"node": ">=0.10.0"
 	},
 	"dependencies": {
+		"hasown": "^2.0.2",
 		"minimist": "^1.2.8"
 	},
 	"devDependencies": {
