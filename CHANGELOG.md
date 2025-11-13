@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.2](https://github.com/ljharb/npmignore/compare/v0.3.1...v0.3.2) - 2025-11-13
+
+### Commits
+
+- [Tests] increase coverage [`9b224a9`](https://github.com/ljharb/npmignore/commit/9b224a90a05559da9fec29b5a39f6cd339112ba8)
+- [New] `--auto` mode: respect global gitignore [`d4f706e`](https://github.com/ljharb/npmignore/commit/d4f706e39df189f48e7f3c615f4d82c8ee05d08d)
+- [Dev Deps] update `@ljharb/eslint-config`, `auto-changelog`, `tape` [`c3ef83d`](https://github.com/ljharb/npmignore/commit/c3ef83d1276009f846735080f53259f4d6b0c744)
+- [meta] use `npm audit` instead of `aud` [`1c01544`](https://github.com/ljharb/npmignore/commit/1c01544249ffe896edd9163bd629ba1b2d82d568)
+- [Dev Deps] update `@ljharb/eslint-config` [`063663a`](https://github.com/ljharb/npmignore/commit/063663a33a931866f1a7edbb9471ffcf5488c5c8)
+- [Dev Deps] update `tape` [`2f4390a`](https://github.com/ljharb/npmignore/commit/2f4390a1e4b609d03f7688a364a3ae7144ab896f)
+- [Dev Deps] update `aud` [`41f6104`](https://github.com/ljharb/npmignore/commit/41f6104972b42f8117968b7e6591c7d18dbe0a31)
+- [Dev Deps] add missing peer dep [`7bc9142`](https://github.com/ljharb/npmignore/commit/7bc914262bbea9ac2ae629cbc07a5abc1307748e)
+
 ## [v0.3.1](https://github.com/ljharb/npmignore/compare/v0.3.0...v0.3.1) - 2023-11-29
 
 ### Commits
