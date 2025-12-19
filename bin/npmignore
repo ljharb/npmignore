@@ -23,6 +23,15 @@ function read(fp) {
 	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
 
+function isIgnoredByGit(filePath) {
+	try {
+		execSync('git check-ignore -q ' + filePath, { stdio: 'ignore' });
+		return true;
+	} catch (_e) {
+		return false;
+	}
+}
+
 function getGitIgnoredFiles(excludeArgs) {
 	try {
 		var result = execSync(
@@ -117,18 +126,14 @@ if (auto) {
 		console.error('gitignore file not found (tried `' + gitignore + '`)');
 		process.exit(1);
 	}
-	var gitignoreLines = git.split('\n').slice(1);
 
 	if (i || u || npmignoreArg || keepdest) {
 		console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
 		process.exit(1);
 	}
 
-	var npmignoreIgnored = gitignoreLines.some(function (x) {
-		return (/^\s*\.npmignore\s*($|#)/).test(x);
-	});
-	if (!npmignoreIgnored) {
-		console.error('in `--auto` mode, `.gitignore` must contain `.npmignore`');
+	if (!isIgnoredByGit(dest)) {
+		console.error('in `--auto` mode, `' + dest + '` must be ignored by git');
 		process.exit(1);
 	}
 
