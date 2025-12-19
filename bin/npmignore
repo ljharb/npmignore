@@ -32,7 +32,7 @@ function getGitIgnoredFiles(excludeArgs) {
 		return result.split('\n').filter(function (line) {
 			return line.length > 0;
 		});
-	} catch (e) {
+	} catch (_e) {
 		return [];
 	}
 }
