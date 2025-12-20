@@ -121,6 +121,27 @@ var auto = !!argv.auto;
 var git = read(gitignore);
 var npm = auto ? '' : read(npmignore);
 
+function finish() {
+	// Parse the files and create a new `.npmignore` file
+	// based on the given arguments along with data that
+	// is already present in either or both files.
+	var res = parser(npm, git, {
+		commentLines: commentLines,
+		ignore: i,
+		keepdest: keepdest,
+		unignore: u,
+	});
+
+	// write the file.
+	fs.writeFileSync(dest, res);
+
+	if (auto) {
+		console.log('read ' + gitignore + ' and `package.json` `publishConfig.ignore`, updated ' + dest);
+	} else {
+		console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
+	}
+}
+
 if (auto) {
 	if (!git) {
 		console.error('gitignore file not found (tried `' + gitignore + '`)');
@@ -169,21 +190,4 @@ if (auto) {
 	}
 }
 
-// Parse the files and create a new `.npmignore` file
-// based on the given arguments along with data that
-// is already present in either or both files.
-var res = parser(npm, git, {
-	commentLines: commentLines,
-	ignore: i,
-	keepdest: keepdest,
-	unignore: u,
-});
-
-// write the file.
-fs.writeFileSync(dest, res);
-
-if (auto) {
-	console.log('read ' + gitignore + ' and `package.json` `publishConfig.ignore`, updated ' + dest);
-} else {
-	console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
-}
+finish();
