@@ -3,7 +3,7 @@
 var test = require('tape');
 var path = require('path');
 var fs = require('fs');
-var execSync = require('child_process').execSync;
+var exec = require('child_process').exec;
 
 var binPath = path.join(__dirname, '..', 'bin', 'npmignore');
 
@@ -27,28 +27,22 @@ function cleanup(dir) {
 	fs.rmdirSync(dir);
 }
 
-function exec(cmd, cwd) {
-	try {
-		return {
-			stdout: execSync(cmd, { cwd: cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }),
-			exitCode: 0,
-		};
-	} catch (e) {
-		return {
-			stdout: e.stdout || '',
-			stderr: e.stderr || '',
-			exitCode: e.status,
-		};
-	}
+function run(cmd, cwd, cb) {
+	exec(cmd, { cwd: cwd }, function (e, stdout, stderr) {
+		cb({
+			stdout: stdout || '',
+			stderr: stderr || '',
+			exitCode: e ? e.code : 0,
+		});
+	});
 }
 
 test('CLI: --auto mode requires .npmignore to be ignored by git', function (t) {
+	t.plan(2);
 	var tmpDir = createTempDir();
 
-	try {
-		// Initialize git repo
-		exec('git init', tmpDir);
-
+	// Initialize git repo
+	run('git init', tmpDir, function () {
 		// Create .gitignore WITHOUT .npmignore
 		fs.writeFileSync(path.join(tmpDir, '.gitignore'), 'node_modules/\n');
 
@@ -60,27 +54,23 @@ test('CLI: --auto mode requires .npmignore to be ignored by git', function (t) {
 		}));
 
 		// Run --auto mode, should fail
-		var result = exec('node ' + binPath + ' --auto', tmpDir);
-
-		t.equal(result.exitCode, 1, 'exits with code 1 when .npmignore is not ignored');
-		t.ok(
-			result.stderr.indexOf('must be ignored by git') > -1,
-			'error message mentions file must be ignored by git'
-		);
-	} finally {
-		cleanup(tmpDir);
-	}
-
-	t.end();
+		run('node ' + binPath + ' --auto', tmpDir, function (result) {
+			t.equal(result.exitCode, 1, 'exits with code 1 when .npmignore is not ignored');
+			t.ok(
+				result.stderr.indexOf('must be ignored by git') > -1,
+				'error message mentions file must be ignored by git'
+			);
+			cleanup(tmpDir);
+		});
+	});
 });
 
 test('CLI: --auto mode succeeds when .npmignore is ignored by git', function (t) {
+	t.plan(3);
 	var tmpDir = createTempDir();
 
-	try {
-		// Initialize git repo
-		exec('git init', tmpDir);
-
+	// Initialize git repo
+	run('git init', tmpDir, function () {
 		// Create .gitignore WITH .npmignore
 		fs.writeFileSync(path.join(tmpDir, '.gitignore'), 'node_modules/\n.npmignore\n');
 
@@ -92,27 +82,23 @@ test('CLI: --auto mode succeeds when .npmignore is ignored by git', function (t)
 		}));
 
 		// Run --auto mode, should succeed
-		var result = exec('node ' + binPath + ' --auto', tmpDir);
+		run('node ' + binPath + ' --auto', tmpDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0 when .npmignore is ignored');
+			t.ok(fs.existsSync(path.join(tmpDir, '.npmignore')), '.npmignore file was created');
 
-		t.equal(result.exitCode, 0, 'exits with code 0 when .npmignore is ignored');
-		t.ok(fs.existsSync(path.join(tmpDir, '.npmignore')), '.npmignore file was created');
-
-		var content = fs.readFileSync(path.join(tmpDir, '.npmignore'), 'utf8');
-		t.ok(content.indexOf('foo') > -1, '.npmignore contains publishConfig.ignore entries');
-	} finally {
-		cleanup(tmpDir);
-	}
-
-	t.end();
+			var content = fs.readFileSync(path.join(tmpDir, '.npmignore'), 'utf8');
+			t.ok(content.indexOf('foo') > -1, '.npmignore contains publishConfig.ignore entries');
+			cleanup(tmpDir);
+		});
+	});
 });
 
 test('CLI: --auto mode works with global gitignore', function (t) {
+	t.plan(2);
 	var tmpDir = createTempDir();
 
-	try {
-		// Initialize git repo
-		exec('git init', tmpDir);
-
+	// Initialize git repo
+	run('git init', tmpDir, function () {
 		// Create .gitignore with .npmignore via a pattern
 		fs.writeFileSync(path.join(tmpDir, '.gitignore'), 'node_modules/\n.*ignore\n');
 
@@ -124,25 +110,21 @@ test('CLI: --auto mode works with global gitignore', function (t) {
 		}));
 
 		// Run --auto mode - should succeed because .*ignore pattern matches .npmignore
-		var result = exec('node ' + binPath + ' --auto', tmpDir);
-
-		t.equal(result.exitCode, 0, 'exits with code 0 when .npmignore matches glob pattern');
-		t.ok(fs.existsSync(path.join(tmpDir, '.npmignore')), '.npmignore file was created');
-	} finally {
-		cleanup(tmpDir);
-	}
-
-	t.end();
+		run('node ' + binPath + ' --auto', tmpDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0 when .npmignore matches glob pattern');
+			t.ok(fs.existsSync(path.join(tmpDir, '.npmignore')), '.npmignore file was created');
+			cleanup(tmpDir);
+		});
+	});
 });
 
 test('CLI: --auto mode works from subdirectory', function (t) {
+	t.plan(2);
 	var tmpDir = createTempDir();
 	var subDir = path.join(tmpDir, 'packages', 'foo');
 
-	try {
-		// Initialize git repo at root
-		exec('git init', tmpDir);
-
+	// Initialize git repo at root
+	run('git init', tmpDir, function () {
 		// Create .gitignore at root with .npmignore
 		fs.writeFileSync(path.join(tmpDir, '.gitignore'), 'node_modules/\n.npmignore\n');
 
@@ -162,13 +144,10 @@ test('CLI: --auto mode works from subdirectory', function (t) {
 
 		// Run --auto mode from subdirectory
 		// The root .gitignore should still cause .npmignore to be ignored
-		var result = exec('node ' + binPath + ' --auto', subDir);
-
-		t.equal(result.exitCode, 0, 'exits with code 0 - root gitignore pattern applies');
-		t.ok(fs.existsSync(path.join(subDir, '.npmignore')), '.npmignore file was created in subdirectory');
-	} finally {
-		cleanup(tmpDir);
-	}
-
-	t.end();
+		run('node ' + binPath + ' --auto', subDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0 - root gitignore pattern applies');
+			t.ok(fs.existsSync(path.join(subDir, '.npmignore')), '.npmignore file was created in subdirectory');
+			cleanup(tmpDir);
+		});
+	});
 });

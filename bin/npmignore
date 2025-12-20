@@ -4,7 +4,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var execSync = require('child_process').execSync;
+var exec = require('child_process').exec;
 var argv = require('minimist')(process.argv.slice(2));
 var hasOwn = require('hasown');
 
@@ -14,36 +14,32 @@ function read(fp) {
 	if (fp.indexOf(',') > -1) {
 		return fp.split(/,/g).map(read).join('\n');
 	}
-	if (!path.isAbsolute(fp)) {
-		fp = path.join(process.cwd(), fp);
-	}
+	fp = path.resolve(fp);
 	if (!fs.existsSync(fp)) {
 		return null;
 	}
 	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
 
-function isIgnoredByGit(filePath) {
-	try {
-		execSync('git check-ignore -q ' + filePath, { stdio: 'ignore' });
-		return true;
-	} catch (_e) {
-		return false;
-	}
+function isIgnoredByGit(filePath, cb) {
+	exec('git check-ignore -q ' + filePath, function (_e) {
+		cb(!_e);
+	});
 }
 
-function getGitIgnoredFiles(excludeArgs) {
-	try {
-		var result = execSync(
-			'git ls-files --others --ignored ' + excludeArgs,
-			{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
-		);
-		return result.split('\n').filter(function (line) {
-			return line.length > 0;
-		});
-	} catch (_e) {
-		return [];
-	}
+function getGitIgnoredFiles(excludeArgs, cb) {
+	exec(
+		'git ls-files --others --ignored ' + excludeArgs,
+		function (_e, stdout) {
+			if (_e) {
+				cb([]);
+			} else {
+				cb(stdout.split('\n').filter(function (line) {
+					return line.length > 0;
+				}));
+			}
+		}
+	);
 }
 
 function minimizeGlobPatterns(files) {
@@ -80,22 +76,22 @@ function minimizeGlobPatterns(files) {
 	return patterns.concat(topLevelFiles);
 }
 
-function computeGloballyIgnoredFiles() {
+function computeGloballyIgnoredFiles(cb) {
 	// get all ignored files (local + global gitignore)
-	var allIgnored = getGitIgnoredFiles('--exclude-standard');
+	getGitIgnoredFiles('--exclude-standard', function (allIgnored) {
+		// get only locally ignored files
+		getGitIgnoredFiles('--exclude-from=.gitignore', function (locallyIgnored) {
+			// Compute the difference: files in allIgnored but not in locallyIgnored
+			var globallyIgnored = [];
+			for (var i = 0; i < allIgnored.length; i++) {
+				if (locallyIgnored.indexOf(allIgnored[i]) === -1) {
+					globallyIgnored[globallyIgnored.length] = allIgnored[i];
+				}
+			}
 
-	// get only locally ignored files
-	var locallyIgnored = getGitIgnoredFiles('--exclude-from=.gitignore');
-
-	// Compute the difference: files in allIgnored but not in locallyIgnored
-	var globallyIgnored = [];
-	for (var i = 0; i < allIgnored.length; i++) {
-		if (locallyIgnored.indexOf(allIgnored[i]) === -1) {
-			globallyIgnored[globallyIgnored.length] = allIgnored[i];
-		}
-	}
-
-	return minimizeGlobPatterns(globallyIgnored);
+			cb(minimizeGlobPatterns(globallyIgnored));
+		});
+	});
 }
 
 var gitignore = argv.g || argv.gitignore || '.gitignore';
@@ -153,34 +149,39 @@ if (auto) {
 		process.exit(1);
 	}
 
-	if (!isIgnoredByGit(dest)) {
-		console.error('in `--auto` mode, `' + dest + '` must be ignored by git');
-		process.exit(1);
-	}
+	isIgnoredByGit(dest, function (ignored) {
+		if (!ignored) {
+			console.error('in `--auto` mode, `' + dest + '` must be ignored by git');
+			process.exit(1);
+		}
 
-	if (fs.existsSync(dest)) {
-		fs.unlinkSync(dest); // remove existing npmignore file
-	}
+		if (fs.existsSync(dest)) {
+			fs.unlinkSync(dest); // remove existing npmignore file
+		}
 
-	var pkgPath = path.join(process.cwd(), 'package.json');
-	var publishConfig = JSON.parse(fs.readFileSync(pkgPath)).publishConfig;
-	if (!publishConfig) {
-		console.warn('no `publishConfig` in `package.json`');
-	} else if (Object.prototype.hasOwnProperty.call(publishConfig, 'ignore') && !Array.isArray(publishConfig.ignore)) {
-		console.error('`publishConfig.ignore` in `package.json` is not an array');
-		process.exit(2);
-	}
-	i = publishConfig && publishConfig.ignore;
+		var pkgPath = path.join(process.cwd(), 'package.json');
+		var publishConfig = JSON.parse(fs.readFileSync(pkgPath)).publishConfig;
+		if (!publishConfig) {
+			console.warn('no `publishConfig` in `package.json`');
+		} else if (Object.prototype.hasOwnProperty.call(publishConfig, 'ignore') && !Array.isArray(publishConfig.ignore)) {
+			console.error('`publishConfig.ignore` in `package.json` is not an array');
+			process.exit(2);
+		}
+		i = publishConfig && publishConfig.ignore;
 
-	var globallyIgnored = computeGloballyIgnoredFiles();
-	if (globallyIgnored.length > 0) {
-		i = (i || []).concat(globallyIgnored);
-	}
+		computeGloballyIgnoredFiles(function (globallyIgnored) {
+			if (globallyIgnored.length > 0) {
+				i = (i || []).concat(globallyIgnored);
+			}
 
-	if (!i) {
-		console.warn('no npmignore diff to write; exiting');
-		process.exit();
-	}
+			if (!i) {
+				console.warn('no npmignore diff to write; exiting');
+				process.exit();
+			}
+
+			finish();
+		});
+	});
 } else {
 	if (typeof i === 'string') {
 		i = i.split(',');
@@ -188,6 +189,5 @@ if (auto) {
 	if (typeof u === 'string') {
 		u = u.split(',');
 	}
+	finish();
 }
-
-finish();
