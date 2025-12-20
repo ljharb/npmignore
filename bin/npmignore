@@ -21,6 +21,27 @@ function read(fp) {
 	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
 }
 
+function findUpward(filename) {
+	var dir = process.cwd();
+	var root = path.parse(dir).root;
+
+	while (dir !== root) {
+		var fp = path.join(dir, filename);
+		if (fs.existsSync(fp)) {
+			return fp;
+		}
+		dir = path.dirname(dir);
+	}
+
+	// Check root directory too
+	var rootFp = path.join(root, filename);
+	if (fs.existsSync(rootFp)) {
+		return rootFp;
+	}
+
+	return null;
+}
+
 function isIgnoredByGit(filePath, cb) {
 	exec('git check-ignore -q ' + filePath, function (_e) {
 		cb(!_e);
@@ -139,6 +160,15 @@ function finish() {
 }
 
 if (auto) {
+	if (!git) {
+		// Try searching upward from cwd to find a .gitignore
+		var foundGitignore = findUpward(path.basename(gitignore));
+		if (foundGitignore) {
+			gitignore = foundGitignore;
+			git = read(gitignore);
+		}
+	}
+
 	if (!git) {
 		console.error('gitignore file not found (tried `' + gitignore + '`)');
 		process.exit(1);

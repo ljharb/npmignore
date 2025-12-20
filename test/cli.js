@@ -151,3 +151,37 @@ test('CLI: --auto mode works from subdirectory', function (t) {
 		});
 	});
 });
+
+test('CLI: --auto mode finds .gitignore in parent directory when not present locally', function (t) {
+	t.plan(3);
+	var tmpDir = createTempDir();
+	var subDir = path.join(tmpDir, 'packages', 'foo');
+
+	// Initialize git repo at root
+	run('git init', tmpDir, function () {
+		// Create .gitignore at root with .npmignore
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), 'node_modules/\n.npmignore\n');
+
+		// Create subdirectory structure
+		fs.mkdirSync(path.join(tmpDir, 'packages'));
+		fs.mkdirSync(subDir);
+
+		// Create package.json in subdirectory
+		fs.writeFileSync(path.join(subDir, 'package.json'), JSON.stringify({
+			name: 'test-sub',
+			version: '1.0.0',
+			publishConfig: { ignore: ['qux'] },
+		}));
+
+		// NO local .gitignore in subdirectory - should find parent's .gitignore
+		// Run --auto mode from subdirectory
+		run('node ' + binPath + ' --auto', subDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0 - finds .gitignore in parent');
+			t.ok(fs.existsSync(path.join(subDir, '.npmignore')), '.npmignore file was created');
+
+			var content = fs.readFileSync(path.join(subDir, '.npmignore'), 'utf8');
+			t.ok(content.indexOf('qux') > -1, '.npmignore contains publishConfig.ignore entries');
+			cleanup(tmpDir);
+		});
+	});
+});
