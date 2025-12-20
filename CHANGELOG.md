@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.3](https://github.com/ljharb/npmignore/compare/v0.3.2...v0.3.3) - 2025-12-19
+
+### Commits
+
+- [Fix] use `exec` instead of `execSync` [`6b67465`](https://github.com/ljharb/npmignore/commit/6b67465111edee14e504faf7cc4b9ff25410b97d)
+- [Fix] check if npmignore is ignored, instead of looking at gitignore contents [`e6ea871`](https://github.com/ljharb/npmignore/commit/e6ea871575e6d391e81dc6c8e04bb4d4fec3c95d)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config` [`53cbb21`](https://github.com/ljharb/npmignore/commit/53cbb21a18ef89c22baed03d378521ccc621eeaa)
+- [Refactor] move finisher logic into a function [`008ab73`](https://github.com/ljharb/npmignore/commit/008ab73915a9d758a6da919487df3e459a04b2f6)
+- [Dev Deps] add missing peer dep [`0d6dfce`](https://github.com/ljharb/npmignore/commit/0d6dfce969a7779c0bff81dec5c696add9e04e5c)
+
 ## [v0.3.2](https://github.com/ljharb/npmignore/compare/v0.3.1...v0.3.2) - 2025-11-13
 
 ### Commits
