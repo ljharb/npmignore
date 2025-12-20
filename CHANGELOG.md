@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.4](https://github.com/ljharb/npmignore/compare/v0.3.3...v0.3.4) - 2025-12-20
+
+### Commits
+
+- [Fix] search up to the git root for a gitignore file [`d195293`](https://github.com/ljharb/npmignore/commit/d19529375a973edecc5412a103fed62668a8abc1)
+
 ## [v0.3.3](https://github.com/ljharb/npmignore/compare/v0.3.2...v0.3.3) - 2025-12-19
 
 ### Commits
