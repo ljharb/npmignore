@@ -23,23 +23,19 @@ function read(fp) {
 
 function findUpward(filename) {
 	var dir = process.cwd();
-	var root = path.parse(dir).root;
 
-	while (dir !== root) {
+	while (true) {
 		var fp = path.join(dir, filename);
 		if (fs.existsSync(fp)) {
 			return fp;
 		}
-		dir = path.dirname(dir);
+		var parent = path.dirname(dir);
+		if (parent === dir) {
+			// Reached root, didn't find the file
+			return null;
+		}
+		dir = parent;
 	}
-
-	// Check root directory too
-	var rootFp = path.join(root, filename);
-	if (fs.existsSync(rootFp)) {
-		return rootFp;
-	}
-
-	return null;
 }
 
 function isIgnoredByGit(filePath, cb) {
