@@ -8,6 +8,13 @@ var exec = require('child_process').exec;
 
 var binPath = path.join(__dirname, '..', 'bin', 'npmignore');
 
+// fixture repos must not use, nor change, a git repository that runs these tests (eg, from a hook)
+Object.keys(process.env).forEach(function (key) {
+	if ((/^GIT_/).test(key)) {
+		delete process.env[key];
+	}
+});
+
 var counter = 0;
 function createTempDir() {
 	counter += 1;
