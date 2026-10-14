@@ -3,12 +3,15 @@
 var test = require('tape');
 var path = require('path');
 var fs = require('fs');
+var os = require('os');
 var exec = require('child_process').exec;
 
 var binPath = path.join(__dirname, '..', 'bin', 'npmignore');
 
+var counter = 0;
 function createTempDir() {
-	var tmpDir = path.join(__dirname, '..', '.tmp-test-' + Date.now());
+	counter += 1;
+	var tmpDir = path.join(fs.realpathSync(os.tmpdir()), 'npmignore-cli-test-' + process.pid + '-' + Date.now() + '-' + counter);
 	fs.mkdirSync(tmpDir);
 	return tmpDir;
 }
