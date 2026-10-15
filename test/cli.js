@@ -195,3 +195,20 @@ test('CLI: --auto mode finds .gitignore in parent directory when not present loc
 		});
 	});
 });
+
+test('CLI: --auto mode crashes on a `package.json` of `null`', function (t) {
+	t.plan(3);
+	var tmpDir = createTempDir();
+
+	run('git init', tmpDir, function () {
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), '.npmignore\n');
+		fs.writeFileSync(path.join(tmpDir, 'package.json'), 'null');
+
+		run('node ' + binPath + ' --auto', tmpDir, function (result) {
+			t.notEqual(result.exitCode, 0, 'exits with a nonzero code');
+			t.notEqual(result.exitCode, 2, 'does not exit with the code for an invalid `publishConfig.ignore`');
+			t.ok(result.stderr.indexOf('TypeError') > -1, 'reports the TypeError');
+			cleanup(tmpDir);
+		});
+	});
+});

@@ -4,11 +4,10 @@
 
 var fs = require('fs');
 var path = require('path');
-var exec = require('child_process').exec;
 var argv = require('minimist')(process.argv.slice(2));
 
 var parser = require('../');
-var computeGloballyIgnoredFiles = require('../lib/globally-ignored');
+var npmignoreAuto = require('../auto');
 
 function read(fp) {
 	if (fp.indexOf(',') > -1) {
@@ -19,29 +18,6 @@ function read(fp) {
 		return null;
 	}
 	return '# Rules from: ' + fp + '\n' + fs.readFileSync(fp, 'utf8');
-}
-
-function findUpward(filename) {
-	var dir = process.cwd();
-
-	while (true) {
-		var fp = path.join(dir, filename);
-		if (fs.existsSync(fp)) {
-			return fp;
-		}
-		var parent = path.dirname(dir);
-		if (parent === dir) {
-			// Reached root, didn't find the file
-			return null;
-		}
-		dir = parent;
-	}
-}
-
-function isIgnoredByGit(filePath, cb) {
-	exec('git check-ignore -q ' + filePath, function (_e) {
-		cb(!_e);
-	});
 }
 
 var gitignore = argv.g || argv.gitignore || '.gitignore';
@@ -64,14 +40,65 @@ var u = argv.u || argv.unignore;
 
 var auto = !!argv.auto;
 
-var git = read(gitignore);
-var npm = auto ? '' : read(npmignore);
+if (auto) {
+	npmignoreAuto({
+		commentLines: commentLines,
+		dest: String(dest), // `minimist` may produce a non-string, which `git` has always received stringified
+		gitignore: gitignore,
+	}, function (err, result) {
+		if (!err && !result.gitignore) {
+			console.error('gitignore file not found (tried `' + gitignore + '`)');
+			process.exit(1);
+		}
 
-function finish() {
+		if (i || u || npmignoreArg || keepdest) {
+			console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
+			process.exit(1);
+		}
+
+		if (!err && !result.destIgnored) {
+			console.error('in `--auto` mode, `' + dest + '` must be ignored by git');
+			process.exit(1);
+		}
+
+		if (fs.existsSync(dest)) {
+			fs.unlinkSync(dest); // remove existing npmignore file
+		}
+
+		if (err) {
+			if (err.code === 'ERR_NPMIGNORE_INVALID_PUBLISHCONFIG_IGNORE') {
+				console.error(err.message);
+				process.exit(2);
+			}
+			throw err;
+		}
+
+		if (!result.hasPublishConfig) {
+			console.warn('no `publishConfig` in `package.json`');
+		}
+
+		if (result.content === null) {
+			console.warn('no npmignore diff to write; exiting');
+			process.exit();
+		}
+
+		fs.writeFileSync(dest, result.content);
+
+		console.log('read ' + result.gitignore + ' and `package.json` `publishConfig.ignore`, updated ' + dest);
+	});
+} else {
+	if (typeof i === 'string') {
+		i = i.split(',');
+	}
+	if (typeof u === 'string') {
+		u = u.split(',');
+	}
+
 	// Parse the files and create a new `.npmignore` file
 	// based on the given arguments along with data that
 	// is already present in either or both files.
-	var res = parser(npm, git, {
+	var git = read(gitignore);
+	var res = parser(read(npmignore), git, {
 		commentLines: commentLines,
 		ignore: i,
 		keepdest: keepdest,
@@ -81,72 +108,5 @@ function finish() {
 	// write the file.
 	fs.writeFileSync(dest, res);
 
-	if (auto) {
-		console.log('read ' + gitignore + ' and `package.json` `publishConfig.ignore`, updated ' + dest);
-	} else {
-		console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
-	}
-}
-
-if (auto) {
-	if (!git) {
-		// Try searching upward from cwd to find a .gitignore
-		var foundGitignore = findUpward(path.basename(gitignore));
-		if (foundGitignore) {
-			gitignore = foundGitignore;
-			git = read(gitignore);
-		}
-	}
-
-	if (!git) {
-		console.error('gitignore file not found (tried `' + gitignore + '`)');
-		process.exit(1);
-	}
-
-	if (i || u || npmignoreArg || keepdest) {
-		console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
-		process.exit(1);
-	}
-
-	isIgnoredByGit(dest, function (ignored) {
-		if (!ignored) {
-			console.error('in `--auto` mode, `' + dest + '` must be ignored by git');
-			process.exit(1);
-		}
-
-		if (fs.existsSync(dest)) {
-			fs.unlinkSync(dest); // remove existing npmignore file
-		}
-
-		var pkgPath = path.join(process.cwd(), 'package.json');
-		var publishConfig = JSON.parse(fs.readFileSync(pkgPath)).publishConfig;
-		if (!publishConfig) {
-			console.warn('no `publishConfig` in `package.json`');
-		} else if (Object.prototype.hasOwnProperty.call(publishConfig, 'ignore') && !Array.isArray(publishConfig.ignore)) {
-			console.error('`publishConfig.ignore` in `package.json` is not an array');
-			process.exit(2);
-		}
-		i = publishConfig && publishConfig.ignore;
-
-		computeGloballyIgnoredFiles({ cwd: process.cwd() }, function (globallyIgnored) {
-			if (globallyIgnored.length > 0) {
-				i = (i || []).concat(globallyIgnored);
-			}
-
-			if (!i) {
-				console.warn('no npmignore diff to write; exiting');
-				process.exit();
-			}
-
-			finish();
-		});
-	});
-} else {
-	if (typeof i === 'string') {
-		i = i.split(',');
-	}
-	if (typeof u === 'string') {
-		u = u.split(',');
-	}
-	finish();
+	console.log('read ' + gitignore + ' and ' + npmignore + ', updated ' + dest);
 }

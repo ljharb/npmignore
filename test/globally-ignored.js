@@ -15,6 +15,10 @@ Object.keys(process.env).forEach(function (key) {
 	}
 });
 
+function isNever() {
+	return false;
+}
+
 var counter = 0;
 function createTempDir(t) {
 	counter += 1;
@@ -69,7 +73,7 @@ test('computeGloballyIgnoredFiles: files ignored only globally', function (t) {
 		write(repo, 'node_modules/x.js', 'x');
 		write(repo, 'index.js', 'module.exports = 1;');
 
-		computeGloballyIgnoredFiles({ cwd: repo }, function (globallyIgnored) {
+		computeGloballyIgnoredFiles({ cwd: repo, isExcluded: isNever }, function (globallyIgnored) {
 			t.deepEqual(globallyIgnored, ['secret/', '.env'], 'yields patterns for globally, but not locally, ignored files');
 			t.end();
 		});
@@ -81,7 +85,7 @@ test('computeGloballyIgnoredFiles: nothing globally ignored', function (t) {
 		write(repo, '.gitignore', 'node_modules/\n');
 		write(repo, 'node_modules/x.js', 'x');
 
-		computeGloballyIgnoredFiles({ cwd: repo }, function (globallyIgnored) {
+		computeGloballyIgnoredFiles({ cwd: repo, isExcluded: isNever }, function (globallyIgnored) {
 			t.deepEqual(globallyIgnored, [], 'yields no patterns');
 			t.end();
 		});
@@ -91,7 +95,7 @@ test('computeGloballyIgnoredFiles: nothing globally ignored', function (t) {
 test('computeGloballyIgnoredFiles: not in a git repository', function (t) {
 	var dir = createTempDir(t);
 
-	computeGloballyIgnoredFiles({ cwd: dir }, function (globallyIgnored) {
+	computeGloballyIgnoredFiles({ cwd: dir, isExcluded: isNever }, function (globallyIgnored) {
 		t.deepEqual(globallyIgnored, [], 'yields no patterns');
 		t.end();
 	});
