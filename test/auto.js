@@ -574,7 +574,7 @@ test('npmignoreAuto: `git ls-files` failures are reported', { skip: process.plat
 				'',
 			].join('\n'));
 			fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
-			process.env.PATH = shimDir + path.delimiter + origPath;
+			process.env.PATH = shimDir + ':' + origPath; // `path.delimiter` is node 0.9.3+; the shims are POSIX `sh` scripts anyway
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				t.ok(err && err.message.indexOf('ls-files failed') > -1, 'yields the error from `git ls-files`');
@@ -770,7 +770,7 @@ test('npmignoreAuto: `git` failures while finding ignore rules are reported', { 
 						'',
 					].join('\n'));
 					fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
-					process.env.PATH = shimDir + path.delimiter + origPath;
+					process.env.PATH = shimDir + ':' + origPath; // `path.delimiter` is node 0.9.3+; the shims are POSIX `sh` scripts anyway
 
 					npmignoreAuto({ cwd: repo }, function (err, result) {
 						st.ok(err && err.message.indexOf(failing + ' failed') > -1, 'yields the error from `git ' + failing + '`');
@@ -966,7 +966,7 @@ test('npmignoreAuto: `git ls-files` failures while listing every file are report
 				'',
 			].join('\n'));
 			fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
-			process.env.PATH = shimDir + path.delimiter + origPath;
+			process.env.PATH = shimDir + ':' + origPath; // `path.delimiter` is node 0.9.3+; the shims are POSIX `sh` scripts anyway
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				t.ok(err && err.message.indexOf('ls-files --cached failed') > -1, 'yields the error from `git ls-files`');
