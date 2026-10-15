@@ -1086,6 +1086,30 @@ test('npmignoreAuto: files that a global rule ignores are reported, even when a 
 	});
 });
 
+test('npmignoreAuto: patterns use the names on disk, which `npm` matches, even when `git` normalizes them', function (t) {
+	createRepo(t, '*.swp\n', function (repo) {
+		execFile('git', ['config', 'core.precomposeUnicode', 'true'], { cwd: repo }, function (configErr) {
+			t.error(configErr, 'fixture repo precomposes Unicode');
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, 'package.json', {});
+			write(repo, 'café.swp', '');
+			fs.mkdirSync(path.join(repo, 'résumé'));
+			write(repo, 'résumé/a.swp', '');
+			write(repo, 'résumé/b.swp', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				t.error(err, 'no error');
+				t.deepEqual(
+					result.globallyIgnored,
+					['/café.swp', '/résumé/'],
+					'decomposed names on disk are written decomposed'
+				);
+				t.end();
+			});
+		});
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');
