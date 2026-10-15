@@ -40,10 +40,24 @@ var u = argv.u || argv.unignore;
 
 var auto = !!argv.auto;
 
+function stringOption(value, flags) {
+	if (typeof value === 'number') {
+		return String(value);
+	}
+	if (typeof value !== 'string') {
+		console.error('`' + flags + '` requires a single value');
+		process.exit(1);
+	}
+	return value;
+}
+
 if (auto) {
+	gitignore = stringOption(gitignore, '-g`/`--gitignore');
+	dest = stringOption(dest, '-d`/`--dest');
+
 	npmignoreAuto({
 		commentLines: commentLines,
-		dest: String(dest), // `minimist` may produce a non-string, which `git` has always received stringified
+		dest: dest,
 		gitignore: gitignore,
 	}, function (err, result) {
 		if (!err && !result.gitignore) {

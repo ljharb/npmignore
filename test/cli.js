@@ -261,3 +261,55 @@ test('CLI: --auto mode crashes on a `package.json` of `null`', function (t) {
 		});
 	});
 });
+
+test('CLI: --auto mode requires a value for --dest and --gitignore', function (t) {
+	var flags = ['-d', '--dest', '-g', '--gitignore', '-d a -d b'];
+	t.plan(1 + (flags.length * 4));
+	var tmpDir = createTempDir();
+	var remaining = flags.length;
+
+	run('git init', tmpDir, function (initResult) {
+		t.equal(initResult.exitCode, 0, 'fixture repo is set up');
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), '.npmignore\ntrue\na\nb\na,b\n');
+		fs.writeFileSync(path.join(tmpDir, '.npmignore'), 'existing\n');
+		fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+			name: 'test',
+			version: '1.0.0',
+			publishConfig: { ignore: ['foo'] },
+		}));
+
+		flags.forEach(function (flag) {
+			run('node ' + binPath + ' --auto ' + flag, tmpDir, function (result) {
+				t.equal(result.exitCode, 1, '`' + flag + '`: exits with code 1');
+				t.ok(result.stderr.indexOf('requires a single value') > -1, '`' + flag + '`: error message says a single value is required');
+				t.notOk(fs.existsSync(path.join(tmpDir, 'true')), '`' + flag + '`: no file named `true` is written');
+				t.equal(fs.readFileSync(path.join(tmpDir, '.npmignore'), 'utf8'), 'existing\n', '`' + flag + '`: the existing destination is unchanged');
+				remaining -= 1;
+				if (remaining === 0) {
+					cleanup(tmpDir);
+				}
+			});
+		});
+	});
+});
+
+test('CLI: --auto mode accepts a numeric --dest', function (t) {
+	t.plan(3);
+	var tmpDir = createTempDir();
+
+	run('git init', tmpDir, function () {
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), '5\n');
+		fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+			name: 'test',
+			version: '1.0.0',
+			publishConfig: { ignore: ['foo'] },
+		}));
+
+		run('node ' + binPath + ' --auto -d 5', tmpDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0');
+			t.ok(fs.existsSync(path.join(tmpDir, '5')), 'destination file named `5` was created');
+			t.ok(fs.readFileSync(path.join(tmpDir, '5'), 'utf8').indexOf('foo') > -1, 'destination contains publishConfig.ignore entries');
+			cleanup(tmpDir);
+		});
+	});
+});
