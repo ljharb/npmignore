@@ -8,7 +8,7 @@ var exec = require('child_process').exec;
 var argv = require('minimist')(process.argv.slice(2));
 
 var parser = require('../');
-var minimizeGlobPatterns = require('../lib/patterns');
+var computeGloballyIgnoredFiles = require('../lib/globally-ignored');
 
 function read(fp) {
 	if (fp.indexOf(',') > -1) {
@@ -41,39 +41,6 @@ function findUpward(filename) {
 function isIgnoredByGit(filePath, cb) {
 	exec('git check-ignore -q ' + filePath, function (_e) {
 		cb(!_e);
-	});
-}
-
-function getGitIgnoredFiles(excludeArgs, cb) {
-	exec(
-		'git ls-files --others --ignored ' + excludeArgs,
-		function (_e, stdout) {
-			if (_e) {
-				cb([]);
-			} else {
-				cb(stdout.split('\n').filter(function (line) {
-					return line.length > 0;
-				}));
-			}
-		}
-	);
-}
-
-function computeGloballyIgnoredFiles(cb) {
-	// get all ignored files (local + global gitignore)
-	getGitIgnoredFiles('--exclude-standard', function (allIgnored) {
-		// get only locally ignored files
-		getGitIgnoredFiles('--exclude-from=.gitignore', function (locallyIgnored) {
-			// Compute the difference: files in allIgnored but not in locallyIgnored
-			var globallyIgnored = [];
-			for (var i = 0; i < allIgnored.length; i++) {
-				if (locallyIgnored.indexOf(allIgnored[i]) === -1) {
-					globallyIgnored[globallyIgnored.length] = allIgnored[i];
-				}
-			}
-
-			cb(minimizeGlobPatterns(globallyIgnored));
-		});
 	});
 }
 
@@ -161,7 +128,7 @@ if (auto) {
 		}
 		i = publishConfig && publishConfig.ignore;
 
-		computeGloballyIgnoredFiles(function (globallyIgnored) {
+		computeGloballyIgnoredFiles({ cwd: process.cwd() }, function (globallyIgnored) {
 			if (globallyIgnored.length > 0) {
 				i = (i || []).concat(globallyIgnored);
 			}
