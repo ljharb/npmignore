@@ -283,11 +283,11 @@ test('npmignoreAuto: globally ignored files', function (t) {
 		npmignoreAuto({ cwd: repo }, function (err, result) {
 			t.error(err, 'no error');
 			t.equal(result.hasPublishConfig, false, 'no `publishConfig`');
-			t.deepEqual(result.globallyIgnored, ['d/', 'a.swp'], 'globally ignored files are minimized to top-level patterns');
-			t.deepEqual(result.ignore, ['d/', 'a.swp'], 'ignore list is the globally ignored files');
+			t.deepEqual(result.globallyIgnored, ['/a.swp', '/d/'], 'globally ignored files are minimized to top-level patterns');
+			t.deepEqual(result.ignore, ['/a.swp', '/d/'], 'ignore list is the globally ignored files');
 			t.equal(
 				result.content,
-				'# Rules from: ' + path.join(repo, '.gitignore') + '\nnode_modules/\n.npmignore\n' + commentPreamble + 'd/\na.swp\n',
+				'# Rules from: ' + path.join(repo, '.gitignore') + '\nnode_modules/\n.npmignore\n' + commentPreamble + '/a.swp\n/d/\n',
 				'content includes globally ignored files'
 			);
 			t.end();
@@ -309,10 +309,10 @@ test('npmignoreAuto: finds a gitignore in a parent directory', function (t) {
 			t.equal(result.gitignore, path.join(repo, '.gitignore'), 'reports the absolute path of the gitignore that was found');
 			t.equal(result.dest, path.join(sub, '.npmignore'), 'dest is relative to `cwd`');
 			t.equal(result.destIgnored, true, 'dest is ignored by the parent gitignore');
-			t.deepEqual(result.ignore, ['qux', 'x.swp'], 'ignore list combines `publishConfig.ignore` and globally ignored files');
+			t.deepEqual(result.ignore, ['qux', '/x.swp'], 'ignore list combines `publishConfig.ignore` and globally ignored files');
 			t.equal(
 				result.content,
-				'# Rules from: ' + path.join(repo, '.gitignore') + '\nnode_modules/\n.npmignore\n' + commentPreamble + 'qux\nx.swp\n',
+				'# Rules from: ' + path.join(repo, '.gitignore') + '\nnode_modules/\n.npmignore\n' + commentPreamble + 'qux\n/x.swp\n',
 				'content is built from the parent gitignore'
 			);
 			t.end();
@@ -371,7 +371,7 @@ test('npmignoreAuto: paths are not quoted, even when `core.quotePath` is enabled
 			npmignoreAuto({ cwd: repo, dest: 'é.npmignore' }, function (err2, result) {
 				t.error(err2, 'no error');
 				t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-				t.deepEqual(result.globallyIgnored, ['ü "x".swp'], 'globally ignored paths are unquoted, and exclude the destination');
+				t.deepEqual(result.globallyIgnored, ['/ü "x".swp'], 'globally ignored paths are unquoted, and exclude the destination');
 				t.end();
 			});
 		});
@@ -391,7 +391,7 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 			npmignoreAuto({ cwd: link, dest: path.join(repo, '.npmignore') }, function (err, result) {
 				st.error(err, 'no error');
 				st.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-				st.deepEqual(result.globallyIgnored, ['a.swp'], 'the destination is not reported as globally ignored');
+				st.deepEqual(result.globallyIgnored, ['/a.swp'], 'the destination is not reported as globally ignored');
 				st.end();
 			});
 		});
@@ -400,7 +400,7 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 			npmignoreAuto({ cwd: repo, dest: path.join(link, '.npmignore') }, function (err, result) {
 				st.error(err, 'no error');
 				st.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-				st.deepEqual(result.globallyIgnored, ['a.swp'], 'the destination is not reported as globally ignored');
+				st.deepEqual(result.globallyIgnored, ['/a.swp'], 'the destination is not reported as globally ignored');
 				st.end();
 			});
 		});
@@ -439,7 +439,7 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 		npmignoreAuto({ cwd: repo, dest: '.NPMIGNORE' }, function (err, result) {
 			t.error(err, 'no error');
 			t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-			t.deepEqual(result.globallyIgnored, ['a.swp'], 'the destination is not reported as globally ignored');
+			t.deepEqual(result.globallyIgnored, ['/a.swp'], 'the destination is not reported as globally ignored');
 			t.end();
 		});
 	});
@@ -455,7 +455,7 @@ test('npmignoreAuto: a hard link to the destination is still reported as globall
 		npmignoreAuto({ cwd: repo, dest: 'out.log' }, function (err, result) {
 			t.error(err, 'no error');
 			t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-			t.deepEqual(result.globallyIgnored, ['other.log'], 'only the destination itself is excluded');
+			t.deepEqual(result.globallyIgnored, ['/other.log'], 'only the destination itself is excluded');
 			t.end();
 		});
 	});
@@ -479,7 +479,7 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 		npmignoreAuto({ cwd: repo, dest: nfc }, function (err, result) {
 			t.error(err, 'no error');
 			t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
-			t.deepEqual(result.globallyIgnored, ['a.log'], 'the destination is not reported as globally ignored');
+			t.deepEqual(result.globallyIgnored, ['/a.log'], 'the destination is not reported as globally ignored');
 			t.end();
 		});
 	});
@@ -549,7 +549,7 @@ test('npmignoreAuto: a very large list of ignored files', function (t) {
 
 		npmignoreAuto({ cwd: repo }, function (err, result) {
 			t.error(err, 'no error, even with more than 1MB of `git ls-files` output');
-			t.deepEqual(result && result.globallyIgnored, ['a.swp'], 'globally ignored files are still found');
+			t.deepEqual(result && result.globallyIgnored, ['/a.swp'], 'globally ignored files are still found');
 			t.end();
 		});
 	});
@@ -602,7 +602,7 @@ test('npmignoreAuto: patterns from `.gitignore` files that npm will use are not 
 			npmignoreAuto({ cwd: pkg }, function (err, result) {
 				st.error(err, 'no error');
 				st.equal(result.gitignore, '.gitignore', 'the package gitignore is used');
-				st.deepEqual(result.globallyIgnored, ['a.swp'], 'only globally ignored files are reported');
+				st.deepEqual(result.globallyIgnored, ['/a.swp'], 'only globally ignored files are reported');
 				st.end();
 			});
 		});
@@ -623,7 +623,7 @@ test('npmignoreAuto: patterns from `.gitignore` files that npm will use are not 
 
 			npmignoreAuto({ cwd: pkg }, function (err, result) {
 				st.error(err, 'no error');
-				st.deepEqual(result.globallyIgnored, ['a.swp'], 'only globally ignored files are reported');
+				st.deepEqual(result.globallyIgnored, ['/a.swp'], 'only globally ignored files are reported');
 				st.end();
 			});
 		});
@@ -645,7 +645,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 			npmignoreAuto({ cwd: pkg }, function (err, result) {
 				st.error(err, 'no error');
 				st.equal(result.gitignore, '.gitignore', 'the package gitignore is used');
-				st.deepEqual(result.globallyIgnored, ['secret.txt'], 'a file ignored only by a parent `.gitignore` is reported');
+				st.deepEqual(result.globallyIgnored, ['/secret.txt'], 'a file ignored only by a parent `.gitignore` is reported');
 				st.end();
 			});
 		});
@@ -660,7 +660,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				st.error(err, 'no error');
-				st.deepEqual(result.globallyIgnored, ['excluded.txt'], 'a file ignored by `.git/info/exclude` is reported');
+				st.deepEqual(result.globallyIgnored, ['/excluded.txt'], 'a file ignored by `.git/info/exclude` is reported');
 				st.end();
 			});
 		});
@@ -677,7 +677,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				st.error(err, 'no error');
-				st.deepEqual(result.globallyIgnored, ['sub/'], 'the file is reported');
+				st.deepEqual(result.globallyIgnored, ['/sub/secret.txt'], 'the file is reported');
 				st.end();
 			});
 		});
@@ -699,7 +699,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 				st.equal(result.gitignore, path.join(repo, '.gitignore'), 'the parent gitignore is used');
 				st.deepEqual(
 					result.globallyIgnored,
-					['build/', 'secret.txt'],
+					['/build/', '/secret.txt'],
 					'files ignored by rules relative to the parent directory are reported; others in the parent gitignore are not'
 				);
 				st.end();
@@ -717,7 +717,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				st.error(err, 'no error');
-				st.deepEqual(result.globallyIgnored, [':!b.g', ':(top)z.g'], 'paths are not read as pathspec magic');
+				st.deepEqual(result.globallyIgnored, ['/:!b.g', '/:\\(top\\)z.g'], 'paths are not read as pathspec magic');
 				st.end();
 			});
 		});
@@ -809,6 +809,175 @@ test('npmignoreAuto: `git check-ignore` failures are reported', function (t) {
 		t.ok(err && (/not a git repository/).test(err.message), 'error is from `git check-ignore`');
 		t.equal(result, undefined, 'no result');
 		t.end();
+	});
+});
+
+test('npmignoreAuto: only directories whose files are all globally ignored are collapsed', function (t) {
+	createRepo(t, '.DS_Store\n*.swp\n', function (repo) {
+		write(repo, '.gitignore', '.npmignore\nbuild/*.js\n');
+		write(repo, 'package.json', { publishConfig: { ignore: ['!build/*.js'] } });
+		fs.mkdirSync(path.join(repo, 'lib'));
+		write(repo, 'lib/index.js', '');
+		write(repo, 'lib/.DS_Store', '');
+		fs.mkdirSync(path.join(repo, 'tracked'));
+		write(repo, 'tracked/index.js', '');
+		write(repo, 'tracked/.DS_Store', '');
+		fs.mkdirSync(path.join(repo, 'build'));
+		write(repo, 'build/out.js', '');
+		write(repo, 'build/.DS_Store', '');
+		fs.mkdirSync(path.join(repo, 'd'));
+		write(repo, 'd/kept.js', '');
+		fs.mkdirSync(path.join(repo, 'd', 'e'));
+		fs.mkdirSync(path.join(repo, 'd', 'e', 'f'));
+		write(repo, 'd/e/a.swp', '');
+		write(repo, 'd/e/f/b.swp', '');
+
+		execFile('git', ['add', 'tracked/index.js'], { cwd: repo }, function (addErr) {
+			t.error(addErr, 'a file is tracked');
+			fs.unlinkSync(path.join(repo, 'tracked', 'index.js')); // tracked, but not on disk, so only `--cached` lists it
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				t.error(err, 'no error');
+				t.deepEqual(
+					result.globallyIgnored,
+					['/build/.DS_Store', '/d/e/', '/lib/.DS_Store', '/tracked/.DS_Store'],
+					'a directory with an untracked, a tracked, or a locally ignored, file is not collapsed; a nested one with only globally ignored files is'
+				);
+				t.deepEqual(
+					result.ignore,
+					['!build/*.js', '/build/.DS_Store', '/d/e/', '/lib/.DS_Store', '/tracked/.DS_Store'],
+					'un-ignored files stay un-ignored'
+				);
+				t.end();
+			});
+		});
+	});
+});
+
+test('npmignoreAuto: no pattern matches another file or directory that differs only in case, as `npm` matches', function (t) {
+	t.test('directories', function (st) {
+		createRepo(st, '*.swp\n', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, 'package.json', {});
+			fs.mkdirSync(path.join(repo, 'Build'));
+			write(repo, 'Build/x.swp', '');
+			fs.mkdirSync(path.join(repo, '\u03c3'));
+			write(repo, '\u03c3/y.swp', '');
+
+			if (fs.existsSync(path.join(repo, 'build')) || fs.existsSync(path.join(repo, '\u03c2'))) {
+				st.comment('SKIP: the filesystem is case-insensitive');
+				st.end();
+				return;
+			}
+			fs.mkdirSync(path.join(repo, 'build'));
+			write(repo, 'build/index.js', '');
+			fs.mkdirSync(path.join(repo, '\u03c2'));
+			write(repo, '\u03c2/index.js', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(
+					result.globallyIgnored.slice().sort(),
+					['/Build/x.swp', '/\u03c3/y.swp'].sort(),
+					'directories are not collapsed when one that `npm` considers the same has other files'
+				);
+				st.end();
+			});
+		});
+	});
+
+	t.test('files', function (st) {
+		createRepo(st, 'Secret.txt\nLib\n', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, 'package.json', {});
+			write(repo, 'Secret.txt', '');
+			write(repo, 'Lib', '');
+			write(repo, 'other.txt', '');
+
+			if (fs.existsSync(path.join(repo, 'secret.txt'))) {
+				st.comment('SKIP: the filesystem is case-insensitive');
+				st.end();
+				return;
+			}
+			write(repo, 'secret.txt', '');
+			fs.mkdirSync(path.join(repo, 'lib'));
+			write(repo, 'lib/index.js', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(result.globallyIgnored, [], 'no pattern would also exclude a kept file or directory');
+				st.end();
+			});
+		});
+	});
+
+	t.end();
+});
+
+test('npmignoreAuto: globally ignored paths are escaped', { skip: process.platform === 'win32' }, function (t) {
+	createRepo(t, '*.swp*\n', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		write(repo, 'package.json', {});
+		var names = ['#c.swp', '!d.swp', 'a*b?[c]{d,e}(f)+@.swp', 'back\\slash.swp', 'trailing.swp \t', 'new\nline.swp', 'carriage\rreturn.swp', '\u00df.swp', '\u0131.swp'];
+		names.forEach(function (name) {
+			write(repo, name, '');
+		});
+		fs.mkdirSync(path.join(repo, '__proto__'));
+		write(repo, '__proto__/x.swp', '');
+
+		npmignoreAuto({ cwd: repo }, function (err, result) {
+			t.error(err, 'no error');
+			t.deepEqual(
+				result.globallyIgnored.slice().sort(),
+				[
+					'/!d.swp',
+					'/#c.swp',
+					'/__proto__/',
+					'/a[*]b[?][[]c]\\{d,e\\}\\(f\\)+@.swp',
+					'/back\\\\slash.swp',
+					'/carriage\rreturn.swp',
+					'/new?line.swp',
+					'/trailing.swp[ ][\t]',
+					'/\u00df.swp',
+					'/\u0131.swp',
+				].sort(),
+				'paths are anchored, and escaped for every version of `minimatch` that `npm` uses'
+			);
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: `git ls-files` failures while listing every file are reported', { skip: process.platform === 'win32' }, function (t) {
+	execFile('sh', ['-c', 'command -v git'], function (whichErr, gitPath) {
+		t.error(whichErr, 'found `git`');
+
+		createRepo(t, '*.swp\n', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, 'package.json', {});
+			write(repo, 'a.swp', '');
+
+			var shimDir = createTempDir();
+			var origPath = process.env.PATH;
+			t.teardown(function () {
+				process.env.PATH = origPath;
+				cleanup(shimDir);
+			});
+			fs.writeFileSync(path.join(shimDir, 'git'), [
+				'#!/bin/sh',
+				'if [ "$1 $2" = "ls-files --cached" ]; then echo "ls-files --cached failed" >&2; exit 1; fi',
+				'exec "' + String(gitPath).trim() + '" "$@"',
+				'',
+			].join('\n'));
+			fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
+			process.env.PATH = shimDir + path.delimiter + origPath;
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				t.ok(err && err.message.indexOf('ls-files --cached failed') > -1, 'yields the error from `git ls-files`');
+				t.equal(result, undefined, 'no result');
+				t.end();
+			});
+		});
 	});
 });
 

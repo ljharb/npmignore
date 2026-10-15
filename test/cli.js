@@ -239,7 +239,7 @@ test('CLI: --auto mode does not C-quote globally ignored paths', function (t) {
 		run('node ' + binPath + ' --auto', repo, function (result) {
 			t.equal(result.exitCode, 0, 'exits with code 0');
 			var lines = fs.readFileSync(path.join(repo, '.npmignore'), 'utf8').split('\n');
-			t.ok(lines.indexOf('ü "x".swp') > -1, '.npmignore contains the unquoted globally ignored path');
+			t.ok(lines.indexOf('/ü "x".swp') > -1, '.npmignore contains the unquoted globally ignored path');
 			cleanup(tmpDir);
 		});
 	});

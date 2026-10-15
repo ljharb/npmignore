@@ -79,7 +79,7 @@ test('computeGloballyIgnoredFiles: files ignored only globally', function (t) {
 			isExcluded: isNever,
 		}, function (err, globallyIgnored) {
 			t.error(err, 'no error');
-			t.deepEqual(globallyIgnored, ['secret/', '.env'], 'yields patterns for globally, but not locally, ignored files');
+			t.deepEqual(globallyIgnored, ['/.env', '/secret/'], 'yields patterns for globally, but not locally, ignored files');
 			t.end();
 		});
 	});
