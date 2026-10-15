@@ -75,16 +75,16 @@ if (auto) {
 			process.exit(1);
 		}
 
-		if (fs.existsSync(dest)) {
-			fs.unlinkSync(dest); // remove existing npmignore file
-		}
-
 		if (err) {
 			if (err.code === 'ERR_NPMIGNORE_INVALID_PUBLISHCONFIG_IGNORE') {
 				console.error(err.message);
 				process.exit(2);
 			}
 			throw err;
+		}
+
+		if (fs.existsSync(dest)) {
+			fs.unlinkSync(dest); // remove existing npmignore file
 		}
 
 		if (!result.hasPublishConfig) {

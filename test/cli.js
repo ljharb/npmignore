@@ -313,3 +313,26 @@ test('CLI: --auto mode accepts a numeric --dest', function (t) {
 		});
 	});
 });
+
+test('CLI: --auto mode does not remove the existing destination when it fails', function (t) {
+	t.plan(4);
+	var tmpDir = createTempDir();
+
+	run('git init', tmpDir, function () {
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), '.npmignore\n');
+		fs.writeFileSync(path.join(tmpDir, '.npmignore'), 'existing\n');
+		fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+			name: 'test',
+			version: '1.0.0',
+			publishConfig: { ignore: 'foo' },
+		}));
+
+		run('node ' + binPath + ' --auto', tmpDir, function (result) {
+			t.equal(result.exitCode, 2, 'exits with code 2');
+			t.ok(result.stderr.indexOf('is not an array') > -1, 'error message says `publishConfig.ignore` is not an array');
+			t.ok(fs.existsSync(path.join(tmpDir, '.npmignore')), 'existing destination is not removed');
+			t.equal(fs.readFileSync(path.join(tmpDir, '.npmignore'), 'utf8'), 'existing\n', 'existing destination is unchanged');
+			cleanup(tmpDir);
+		});
+	});
+});
