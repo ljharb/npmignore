@@ -9,17 +9,17 @@ var npmignore = require('./');
 var computeGloballyIgnoredFiles = require('./lib/globally-ignored');
 var isSameEntryAs = require('./lib/files').isSameEntryAs;
 
-function read(fp, cwd) {
-	if (fp.indexOf(',') > -1) {
-		return fp.split(/,/g).map(function (x) {
-			return read(x, cwd);
-		}).join('\n');
-	}
-	var resolved = path.resolve(cwd, fp);
-	if (!fs.existsSync(resolved)) {
-		return null;
-	}
+function readFile(resolved) {
 	return '# Rules from: ' + resolved + '\n' + fs.readFileSync(resolved, 'utf8');
+}
+
+// the existing files among `fp`, a comma-separated list of paths
+function existingFiles(fp, cwd) {
+	return fp.split(',').filter(function (x) {
+		return x.length > 0;
+	}).map(function (x) {
+		return path.resolve(cwd, x);
+	}).filter(fs.existsSync);
 }
 
 function findUpward(filename, cwd) {
@@ -82,21 +82,22 @@ function validateOptions(options) {
 }
 
 function findGitignore(gitignore, cwd) {
-	var git = read(gitignore, cwd);
-	if (git) {
+	var files = existingFiles(gitignore, cwd);
+	if (files.length > 0) {
 		return {
-			content: git,
-			files: gitignore.split(',').map(function (x) {
-				return path.resolve(cwd, x);
-			}).filter(fs.existsSync),
+			content: files.map(readFile).join('\n'),
+			files: files,
 			path: gitignore,
 		};
 	}
-	// Try searching upward from cwd to find a .gitignore
-	var found = findUpward(path.basename(gitignore), cwd);
+	// Try searching upward from cwd to find a file named like the last gitignore
+	var names = gitignore.split(',').filter(function (x) {
+		return x.length > 0;
+	});
+	var found = names.length > 0 && findUpward(path.basename(names[names.length - 1]), cwd);
 	if (found) {
 		return {
-			content: read(found, cwd),
+			content: readFile(found),
 			files: [found],
 			path: found,
 		};

@@ -981,6 +981,86 @@ test('npmignoreAuto: `git ls-files` failures while listing every file are report
 	});
 });
 
+test('npmignoreAuto: a comma-separated `gitignore` list', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		write(repo, 'one.gi', 'one\n');
+		write(repo, 'package.json', { publishConfig: { ignore: ['foo'] } });
+
+		t.test('every file is missing', function (st) {
+			npmignoreAuto({ cwd: repo, gitignore: 'missing1.gi,missing2.gi' }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.gitignore, null, 'no gitignore is found');
+				st.equal(result.content, null, 'no content is produced');
+				st.end();
+			});
+		});
+
+		t.test('empty and missing entries', function (st) {
+			npmignoreAuto({ cwd: repo, gitignore: ',one.gi,,missing.gi,' }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.gitignore, ',one.gi,,missing.gi,', 'reports the gitignore option');
+				st.equal(
+					result.content,
+					'# Rules from: ' + path.join(repo, 'one.gi') + '\none\n' + commentPreamble + 'foo\n',
+					'only existing files are read'
+				);
+				st.end();
+			});
+		});
+
+		t.end();
+	});
+});
+
+test('npmignoreAuto: a gitignore found in a parent directory whose path has a comma', function (t) {
+	createRepo(t, '', function (repo) {
+		var parent = path.join(repo, 'a,b');
+		fs.mkdirSync(parent);
+		write(parent, '.gitignore', '.npmignore\n');
+		var pkg = path.join(parent, 'pkg');
+		fs.mkdirSync(pkg);
+		write(pkg, 'package.json', { publishConfig: { ignore: ['foo'] } });
+
+		npmignoreAuto({ cwd: pkg }, function (err, result) {
+			t.error(err, 'no error');
+			t.equal(result.gitignore, path.join(parent, '.gitignore'), 'the parent gitignore is found');
+			t.equal(
+				result.content,
+				'# Rules from: ' + path.join(parent, '.gitignore') + '\n.npmignore\n' + commentPreamble + 'foo\n',
+				'the parent gitignore is read'
+			);
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: the upward search uses the last nonempty entry of a comma-separated `gitignore` list', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		var pkg = path.join(repo, 'pkg');
+		fs.mkdirSync(pkg);
+		write(pkg, 'package.json', {});
+
+		var lists = ['.gitignore,', ',.gitignore', 'missing.gi,.gitignore,,'];
+		var remaining = lists.length;
+		lists.forEach(function (gitignore) {
+			npmignoreAuto({ cwd: pkg, gitignore: gitignore }, function (err, result) {
+				t.error(err, '`' + gitignore + '`: no error');
+				t.equal(result.gitignore, path.join(repo, '.gitignore'), '`' + gitignore + '`: the parent `.gitignore` is found');
+				remaining -= 1;
+				if (remaining === 0) {
+					npmignoreAuto({ cwd: pkg, gitignore: ',' }, function (err2, result2) {
+						t.error(err2, '`,`: no error');
+						t.equal(result2.gitignore, null, '`,`: no gitignore is found');
+						t.end();
+					});
+				}
+			});
+		});
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');
