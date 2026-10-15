@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.6](https://github.com/ljharb/npmignore/compare/v0.3.5...v0.3.6) - 2026-10-15
+
+### Commits
+
+- [Refactor] `--auto`: extract the computation into `auto.js`, and filesystem helpers into `lib/files.js` [`403aae3`](https://github.com/ljharb/npmignore/commit/403aae3b5016c9339d1eefd3245bbabecf8bb272)
+- [Fix] `--auto`: decide which ignored files are "globally ignored" by whether `npm` will apply their ignore rule [`763d8e2`](https://github.com/ljharb/npmignore/commit/763d8e2dbaa5bb4ba4a3f6e759906af1d8617fdb)
+- [Fix] `--auto`: write globally ignored files as anchored, escaped patterns that match no other file, collapsing only directories whose files are all globally ignored [`5d1f739`](https://github.com/ljharb/npmignore/commit/5d1f7399f473fd6490c6ccfbddbb0c6cc14c1a00)
+- [Refactor] `--auto`: move the computation of globally ignored files into `lib/globally-ignored.js` [`df38b2c`](https://github.com/ljharb/npmignore/commit/df38b2c12393acc724d388068925cfe94518ee31)
+- [Refactor] `auto.js`: [`06c19c4`](https://github.com/ljharb/npmignore/commit/06c19c46c770eae3ca679eb36206fab43e3dbd79)
+- [Fix] `--auto`: do not silently drop globally ignored files when the output of `git ls-files` is large, or `git ls-files` fails [`64fe2a7`](https://github.com/ljharb/npmignore/commit/64fe2a7c3ddcd4c411c51ed8ec0c73078431c2d4)
+- [Fix] `--auto`: handle comma-separated `--gitignore` lists consistently [`132e1c5`](https://github.com/ljharb/npmignore/commit/132e1c5cb07b7172a2c07a2562a02e5ff5e8b07d)
+- [Refactor] `--auto`: move the generation of patterns for globally ignored files into `lib/patterns.js` [`eb34920`](https://github.com/ljharb/npmignore/commit/eb349209b60480871f0a7e6cec7e21b9c33f4448)
+- [Fix] `--auto`: write patterns with the names on disk, which `npm` matches, rather than those `git` reports [`f618d21`](https://github.com/ljharb/npmignore/commit/f618d216b03277ac1b56591ff12d2f99ad842ab8)
+- [Fix] `--auto`: give a clear error when `--dest` or `--gitignore` lack a single value, and write a numeric `--dest` to a file of that name, not to a file descriptor [`c079209`](https://github.com/ljharb/npmignore/commit/c07920913a2f216aa5e5818c0ddbe1a5639aea8a)
+- [actions] update workflows [`5e3e070`](https://github.com/ljharb/npmignore/commit/5e3e0703c97cb6bed296a08892a083768b7b312b)
+- [Fix] `--auto`: add files that a global ignore rule matches, even when a local rule also ignores them [`a9e6475`](https://github.com/ljharb/npmignore/commit/a9e64753c9115ea7c6cb127494fe5df2b7361d22)
+- [Fix] `--auto`: ensure `dest` is passed to `git check-ignore` as a path, never as an option or pathspec magic [`0ac5a55`](https://github.com/ljharb/npmignore/commit/0ac5a55bd1c640d8ff637d1080e2c13e7502857e)
+- [Fix] `--auto`: report `git check-ignore` failures, instead of treating `dest` as not ignored [`2687668`](https://github.com/ljharb/npmignore/commit/268766821d077001b5d8c4c289a307793bc9a0c5)
+- [Fix] `--auto`: use NUL-separated `git ls-files` output, so globally ignored paths are not C-quoted [`12d6685`](https://github.com/ljharb/npmignore/commit/12d66857037f145d6a767e1b3c7e59fb5f607a34)
+- [New] add `npmignore/auto` API, to compute `--auto` output without writing [`2bcba0b`](https://github.com/ljharb/npmignore/commit/2bcba0bd9e4b96d922bbe7287f483927e04460d7)
+- [Fix] `--auto`: run `git` without a shell, so `--dest` is not shell-interpreted [`62ea9f5`](https://github.com/ljharb/npmignore/commit/62ea9f54a1a7f2c0257498b0191b14a5b8b31c26)
+- [Fix] `--auto`: do not remove the existing `dest` when computing its content fails [`9ccea2a`](https://github.com/ljharb/npmignore/commit/9ccea2ab653961894cd5bb67ae9791de57bc874f)
+- [Fix] `--auto`: report incompatible options before anything else [`5175be1`](https://github.com/ljharb/npmignore/commit/5175be1941ad7e3a108d41b7b0b472cf77a346d9)
+- [Tests] use `tmp` instead of `os.tmpdir`, which node 0.8 lacks [`fb988a9`](https://github.com/ljharb/npmignore/commit/fb988a9ef8454037964fe33d340cc596fb8fac73)
+- [Fix] `--auto`: avoid quadratic time when comparing lists of ignored files [`23a6ac6`](https://github.com/ljharb/npmignore/commit/23a6ac656591f81a47033894761b2757da6519e1)
+- [Dev Deps] update `@ljharb/eslint-config`, `auto-changelog`, `eslint`, `tape` [`c5bb91d`](https://github.com/ljharb/npmignore/commit/c5bb91d468b51702681ba27b488557ffa40b93ab)
+- [Tests] isolate CLI tests from inherited `GIT_*` environment variables [`23fb1b4`](https://github.com/ljharb/npmignore/commit/23fb1b4eb14a028510a8fee67b3c26951ac5d53d)
+- [Tests] avoid `path.delimiter`, which node 0.8 lacks [`743d0cf`](https://github.com/ljharb/npmignore/commit/743d0cf5e4931817bf45c5bdd71fd85620fe6e8a)
+- [Tests] create CLI test fixtures in the OS temp directory, not inside the repo [`8d4cdd0`](https://github.com/ljharb/npmignore/commit/8d4cdd0f2a9fb79ea9d1da416cc89c381518af0f)
+- [actions] set least-privilege `cache-mode` [`6f170b2`](https://github.com/ljharb/npmignore/commit/6f170b2c51585fb8d42f89b60291f99e585d4f82)
+- [Dev Deps] update `auto-changelog`; remove `encoding` [`6b7a84c`](https://github.com/ljharb/npmignore/commit/6b7a84c169724a730c21f7ffefffac02117a7678)
+- [Deps] update `hasown` [`2763fc2`](https://github.com/ljharb/npmignore/commit/2763fc2c42415f4907ee8b19cc1bf82af76fb45a)
+
 ## [v0.3.5](https://github.com/ljharb/npmignore/compare/v0.3.4...v0.3.5) - 2025-12-22
 
 ### Commits
