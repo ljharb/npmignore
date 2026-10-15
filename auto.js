@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var exec = require('child_process').exec;
+var execFile = require('child_process').execFile;
 var hasOwn = require('hasown');
 
 var npmignore = require('./');
@@ -40,7 +40,7 @@ function findUpward(filename, cwd) {
 }
 
 function isIgnoredByGit(filePath, cwd, cb) {
-	exec('git check-ignore -q ' + filePath, { cwd: cwd }, function (e) {
+	execFile('git', ['check-ignore', '-q', filePath], { cwd: cwd }, function (e) {
 		cb(!e);
 	});
 }

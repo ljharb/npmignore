@@ -196,6 +196,29 @@ test('CLI: --auto mode finds .gitignore in parent directory when not present loc
 	});
 });
 
+test('CLI: --auto mode does not pass --dest through a shell', function (t) {
+	t.plan(4);
+	var tmpDir = createTempDir();
+	var dest = 'a b.ign;touch PWNED';
+
+	run('git init', tmpDir, function () {
+		fs.writeFileSync(path.join(tmpDir, '.gitignore'), '*.ign*\n');
+		fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+			name: 'test',
+			version: '1.0.0',
+			publishConfig: { ignore: ['foo'] },
+		}));
+
+		run('node ' + binPath + ' --auto --dest \'' + dest + '\'', tmpDir, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0');
+			t.notOk(fs.existsSync(path.join(tmpDir, 'PWNED')), 'shell metacharacters in --dest are not executed');
+			t.ok(fs.existsSync(path.join(tmpDir, dest)), 'destination file is created with the exact given name');
+			t.ok(fs.readFileSync(path.join(tmpDir, dest), 'utf8').indexOf('foo') > -1, 'destination contains publishConfig.ignore entries');
+			cleanup(tmpDir);
+		});
+	});
+});
+
 test('CLI: --auto mode crashes on a `package.json` of `null`', function (t) {
 	t.plan(3);
 	var tmpDir = createTempDir();
