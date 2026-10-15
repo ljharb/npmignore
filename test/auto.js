@@ -589,6 +589,206 @@ test('npmignoreAuto: `git ls-files` failures are reported', { skip: process.plat
 	});
 });
 
+test('npmignoreAuto: patterns from `.gitignore` files that npm will use are not reported as globally ignored', function (t) {
+	t.test('package directory with its own `.gitignore`, repo root without one', function (st) {
+		createRepo(st, '*.swp\n', function (repo) {
+			var pkg = path.join(repo, 'pkg');
+			fs.mkdirSync(pkg);
+			write(pkg, '.gitignore', '.npmignore\n*.log\n');
+			write(pkg, 'package.json', {});
+			write(pkg, 'a.swp', '');
+			write(pkg, 'b.log', '');
+
+			npmignoreAuto({ cwd: pkg }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.gitignore, '.gitignore', 'the package gitignore is used');
+				st.deepEqual(result.globallyIgnored, ['a.swp'], 'only globally ignored files are reported');
+				st.end();
+			});
+		});
+	});
+
+	t.test('package directory with its own `.gitignore`, and repo root with one', function (st) {
+		createRepo(st, '*.swp\n', function (repo) {
+			write(repo, '.gitignore', 'node_modules/\n');
+			var pkg = path.join(repo, 'pkg');
+			fs.mkdirSync(pkg);
+			fs.mkdirSync(path.join(pkg, 'sub'));
+			write(pkg, '.gitignore', '.npmignore\n*.log\n');
+			write(pkg, 'package.json', {});
+			write(pkg, 'a.swp', '');
+			write(pkg, 'b.log', '');
+			write(pkg, 'sub/.gitignore', '*.tmp\n');
+			write(pkg, 'sub/c.tmp', '');
+
+			npmignoreAuto({ cwd: pkg }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(result.globallyIgnored, ['a.swp'], 'only globally ignored files are reported');
+				st.end();
+			});
+		});
+	});
+
+	t.end();
+});
+
+test('npmignoreAuto: files whose ignore rules npm will not apply are reported as globally ignored', function (t) {
+	t.test('a `.gitignore` above the package directory', function (st) {
+		createRepo(st, '', function (repo) {
+			write(repo, '.gitignore', 'secret.txt\n');
+			var pkg = path.join(repo, 'pkg');
+			fs.mkdirSync(pkg);
+			write(pkg, '.gitignore', '.npmignore\n');
+			write(pkg, 'package.json', {});
+			write(pkg, 'secret.txt', '');
+
+			npmignoreAuto({ cwd: pkg }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.gitignore, '.gitignore', 'the package gitignore is used');
+				st.deepEqual(result.globallyIgnored, ['secret.txt'], 'a file ignored only by a parent `.gitignore` is reported');
+				st.end();
+			});
+		});
+	});
+
+	t.test('`.git/info/exclude`', function (st) {
+		createRepo(st, '', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, '.git/info/exclude', 'excluded.txt\n');
+			write(repo, 'package.json', {});
+			write(repo, 'excluded.txt', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(result.globallyIgnored, ['excluded.txt'], 'a file ignored by `.git/info/exclude` is reported');
+				st.end();
+			});
+		});
+	});
+
+	t.test('a `.gitignore` in a subdirectory with an `.npmignore`, which npm reads instead', function (st) {
+		createRepo(st, '', function (repo) {
+			write(repo, '.gitignore', '/.npmignore\n');
+			write(repo, 'package.json', {});
+			fs.mkdirSync(path.join(repo, 'sub'));
+			write(repo, 'sub/.gitignore', 'secret.txt\n');
+			write(repo, 'sub/.npmignore', '# nothing\n');
+			write(repo, 'sub/secret.txt', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(result.globallyIgnored, ['sub/'], 'the file is reported');
+				st.end();
+			});
+		});
+	});
+
+	t.test('a gitignore found in a parent directory', function (st) {
+		createRepo(st, '', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n*.log\n/pkg/build/\npkg/secret.txt\n');
+			var pkg = path.join(repo, 'pkg');
+			fs.mkdirSync(pkg);
+			write(pkg, 'package.json', {});
+			write(pkg, 'a.log', '');
+			write(pkg, 'secret.txt', '');
+			fs.mkdirSync(path.join(pkg, 'build'));
+			write(pkg, 'build/out.js', '');
+
+			npmignoreAuto({ cwd: pkg }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.gitignore, path.join(repo, '.gitignore'), 'the parent gitignore is used');
+				st.deepEqual(
+					result.globallyIgnored,
+					['build/', 'secret.txt'],
+					'files ignored by rules relative to the parent directory are reported; others in the parent gitignore are not'
+				);
+				st.end();
+			});
+		});
+	});
+
+	t.test('paths that look like pathspec magic', { skip: process.platform === 'win32' }, function (st) {
+		createRepo(st, '*.g\n', function (repo) {
+			write(repo, '.gitignore', '/.npmignore\n/z.g\n');
+			write(repo, 'package.json', {});
+			write(repo, ':!b.g', '');
+			write(repo, ':(top)z.g', '');
+			write(repo, 'z.g', '');
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				st.error(err, 'no error');
+				st.deepEqual(result.globallyIgnored, [':!b.g', ':(top)z.g'], 'paths are not read as pathspec magic');
+				st.end();
+			});
+		});
+	});
+
+	t.end();
+});
+
+test('npmignoreAuto: rules from the written gitignore are recognized when `cwd` is spelled in a different case', function (t) {
+	createRepo(t, '', function (repo) {
+		var pkg = path.join(repo, 'pkg');
+		fs.mkdirSync(pkg);
+		write(pkg, '.gitignore', '.npmignore\nbuild/\n');
+		write(pkg, 'package.json', { publishConfig: { ignore: ['!build/'] } });
+		fs.mkdirSync(path.join(pkg, 'build'));
+		write(pkg, 'build/out.js', '');
+
+		var otherCase = path.join(repo, 'PKG');
+		if (!fs.existsSync(otherCase)) {
+			t.comment('SKIP: the filesystem is case-sensitive');
+			t.end();
+			return;
+		}
+
+		npmignoreAuto({ cwd: otherCase }, function (err, result) {
+			t.error(err, 'no error');
+			t.deepEqual(result.globallyIgnored, [], 'nothing is reported as globally ignored');
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: `git` failures while finding ignore rules are reported', { skip: process.platform === 'win32' }, function (t) {
+	execFile('sh', ['-c', 'command -v git'], function (whichErr, gitPath) {
+		t.error(whichErr, 'found `git`');
+
+		['rev-parse --show-prefix', 'check-ignore --verbose'].forEach(function (failing) {
+			t.test('`git ' + failing + '`', function (st) {
+				createRepo(st, '*.swp\n', function (repo) {
+					write(repo, '.gitignore', '.npmignore\n');
+					write(repo, 'package.json', {});
+					write(repo, 'a.swp', '');
+
+					var shimDir = createTempDir();
+					var origPath = process.env.PATH;
+					st.teardown(function () {
+						process.env.PATH = origPath;
+						cleanup(shimDir);
+					});
+					fs.writeFileSync(path.join(shimDir, 'git'), [
+						'#!/bin/sh',
+						'if [ "$1 $2" = "' + failing + '" ]; then echo "' + failing + ' failed" >&2; exit 1; fi',
+						'exec "' + String(gitPath).trim() + '" "$@"',
+						'',
+					].join('\n'));
+					fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
+					process.env.PATH = shimDir + path.delimiter + origPath;
+
+					npmignoreAuto({ cwd: repo }, function (err, result) {
+						st.ok(err && err.message.indexOf(failing + ' failed') > -1, 'yields the error from `git ' + failing + '`');
+						st.equal(result, undefined, 'no result');
+						st.end();
+					});
+				});
+			});
+		});
+
+		t.end();
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');

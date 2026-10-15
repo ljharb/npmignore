@@ -80,12 +80,22 @@ function validateOptions(options) {
 function findGitignore(gitignore, cwd) {
 	var git = read(gitignore, cwd);
 	if (git) {
-		return { content: git, path: gitignore };
+		return {
+			content: git,
+			files: gitignore.split(',').map(function (x) {
+				return path.resolve(cwd, x);
+			}).filter(fs.existsSync),
+			path: gitignore,
+		};
 	}
 	// Try searching upward from cwd to find a .gitignore
 	var found = findUpward(path.basename(gitignore), cwd);
 	if (found) {
-		return { content: read(found, cwd), path: found };
+		return {
+			content: read(found, cwd),
+			files: [found],
+			path: found,
+		};
 	}
 	return null;
 }
@@ -103,6 +113,7 @@ function computeContent(ctx, done) {
 
 	return computeGloballyIgnoredFiles({
 		cwd: result.cwd,
+		gitignoreFiles: ctx.gitignoreFiles,
 		isExcluded: isSameEntryAs(result.dest),
 	}, function (err, globallyIgnored) {
 		if (err) {
@@ -189,6 +200,7 @@ module.exports = function npmignoreAuto(opts, cb) {
 		return computeContent({
 			commentLines: options.commentLines,
 			git: git.content,
+			gitignoreFiles: git.files,
 			result: result,
 		}, done);
 	});
