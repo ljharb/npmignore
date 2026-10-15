@@ -717,7 +717,7 @@ test('npmignoreAuto: files whose ignore rules npm will not apply are reported as
 
 			npmignoreAuto({ cwd: repo }, function (err, result) {
 				st.error(err, 'no error');
-				st.deepEqual(result.globallyIgnored, ['/:!b.g', '/:\\(top\\)z.g'], 'paths are not read as pathspec magic');
+				st.deepEqual(result.globallyIgnored, ['/:!b.g', '/:\\(top\\)z.g', '/z.g'], 'paths are not read as pathspec magic');
 				st.end();
 			});
 		});
@@ -1057,6 +1057,31 @@ test('npmignoreAuto: the upward search uses the last nonempty entry of a comma-s
 					});
 				}
 			});
+		});
+	});
+});
+
+test('npmignoreAuto: files that a global rule ignores are reported, even when a local rule also ignores them', function (t) {
+	createRepo(t, '*.map\n', function (repo) {
+		write(repo, '.gitignore', '/.npmignore\nbuild/\n!keep.map\n');
+		write(repo, '.git/info/exclude', '*.x\n');
+		write(repo, 'package.json', { publishConfig: { ignore: ['!build/'] } });
+		fs.mkdirSync(path.join(repo, 'build'));
+		write(repo, 'build/out.js', '');
+		write(repo, 'build/out.js.map', '');
+		write(repo, 'build/out.x', '');
+		write(repo, 'keep.map', '');
+		write(repo, 'top.map', '');
+
+		npmignoreAuto({ cwd: repo }, function (err, result) {
+			t.error(err, 'no error');
+			t.deepEqual(
+				result.globallyIgnored,
+				['/build/out.js.map', '/build/out.x', '/top.map'],
+				'globally ignored files in a locally ignored directory are reported, but locally un-ignored ones are not'
+			);
+			t.deepEqual(result.ignore, ['!build/', '/build/out.js.map', '/build/out.x', '/top.map'], 'they stay ignored after `publishConfig.ignore`');
+			t.end();
 		});
 	});
 });
