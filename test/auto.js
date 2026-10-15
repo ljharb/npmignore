@@ -485,6 +485,57 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 	});
 });
 
+test('npmignoreAuto: a `dest` that looks like a git option is treated as a path', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '--verbose\n');
+		write(repo, 'package.json', { publishConfig: { ignore: ['foo'] } });
+
+		t.test('an ignored path', function (st) {
+			npmignoreAuto({ cwd: repo, dest: '--verbose' }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.dest, path.join(repo, '--verbose'), 'dest is resolved as a path');
+				st.equal(result.destIgnored, true, 'an ignored path that looks like an option is reported as ignored');
+				st.ok(result.content, 'content is produced');
+				st.end();
+			});
+		});
+
+		t.test('an unignored path', function (st) {
+			npmignoreAuto({ cwd: repo, dest: '--no-index' }, function (err, result) {
+				st.error(err, 'no error');
+				st.equal(result.destIgnored, false, 'an unignored path that looks like an option is reported as not ignored');
+				st.equal(result.content, null, 'no content is produced');
+				st.end();
+			});
+		});
+
+		t.end();
+	});
+});
+
+test('npmignoreAuto: a `dest` that looks like pathspec magic is treated as a path', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '/x\n');
+		var sub = path.join(repo, 'sub');
+		fs.mkdirSync(sub);
+		write(sub, 'package.json', { publishConfig: { ignore: ['foo'] } });
+
+		var dests = [':(top)x', ':/x'];
+		var remaining = dests.length;
+		dests.forEach(function (dest) {
+			npmignoreAuto({ cwd: sub, dest: dest }, function (err, result) {
+				t.error(err, '`' + dest + '`: no error');
+				t.equal(result.dest, path.join(sub, dest), '`' + dest + '`: dest is resolved as a path');
+				t.equal(result.destIgnored, false, '`' + dest + '`: the literal path is not ignored, even though `x` at the repo root is');
+				remaining -= 1;
+				if (remaining === 0) {
+					t.end();
+				}
+			});
+		});
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');
