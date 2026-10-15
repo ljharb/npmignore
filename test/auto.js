@@ -789,6 +789,29 @@ test('npmignoreAuto: `git` failures while finding ignore rules are reported', { 
 	});
 });
 
+test('npmignoreAuto: `git check-ignore` failures are reported', function (t) {
+	var dir = createTempDir();
+	var origCeiling = process.env.GIT_CEILING_DIRECTORIES;
+	process.env.GIT_CEILING_DIRECTORIES = path.dirname(dir);
+	t.teardown(function () {
+		if (typeof origCeiling === 'undefined') {
+			delete process.env.GIT_CEILING_DIRECTORIES;
+		} else {
+			process.env.GIT_CEILING_DIRECTORIES = origCeiling;
+		}
+		cleanup(dir);
+	});
+	write(dir, '.gitignore', '.npmignore\n');
+	write(dir, 'package.json', {});
+
+	npmignoreAuto({ cwd: dir }, function (err, result) {
+		t.ok(err, 'yields an error when not in a git repository');
+		t.ok(err && (/not a git repository/).test(err.message), 'error is from `git check-ignore`');
+		t.equal(result, undefined, 'no result');
+		t.end();
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');

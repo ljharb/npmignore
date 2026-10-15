@@ -336,3 +336,22 @@ test('CLI: --auto mode does not remove the existing destination when it fails', 
 		});
 	});
 });
+
+test('CLI: --auto mode reports when it is not in a git repository', function (t) {
+	t.plan(3);
+	var tmpDir = createTempDir();
+
+	fs.writeFileSync(path.join(tmpDir, '.gitignore'), '.npmignore\n');
+	fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+		name: 'test',
+		version: '1.0.0',
+		publishConfig: { ignore: ['foo'] },
+	}));
+
+	run('GIT_CEILING_DIRECTORIES="' + path.dirname(tmpDir) + '" node ' + binPath + ' --auto', tmpDir, function (result) {
+		t.notEqual(result.exitCode, 0, 'exits with a nonzero code'); // an uncaught error exits with 8 in node < 0.11
+		t.ok(result.stderr.indexOf('not a git repository') > -1, 'error is from `git`');
+		t.equal(result.stderr.indexOf('must be ignored by git'), -1, 'error does not claim the destination is not ignored');
+		cleanup(tmpDir);
+	});
+});

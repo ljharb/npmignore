@@ -42,7 +42,11 @@ function findUpward(filename, cwd) {
 function isIgnoredByGit(filePath, cwd, cb) {
 	// an absolute path can be neither an option nor pathspec magic (eg, `:(top)`)
 	execFile('git', ['check-ignore', '-q', '--', filePath], { cwd: cwd }, function (e) {
-		cb(!e);
+		// exit code 1 means "not ignored"; anything else, eg not being in a git repo, is a failure
+		if (e && e.code !== 1) {
+			return cb(e);
+		}
+		return cb(null, !e);
 	});
 }
 
@@ -192,7 +196,10 @@ module.exports = function npmignoreAuto(opts, cb) {
 	}
 	result.gitignore = git.path;
 
-	return isIgnoredByGit(result.dest, cwd, function (ignored) {
+	return isIgnoredByGit(result.dest, cwd, function (err, ignored) {
+		if (err) {
+			return done(err);
+		}
 		result.destIgnored = ignored;
 		if (!ignored) {
 			return done();
