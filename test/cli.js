@@ -355,3 +355,21 @@ test('CLI: --auto mode reports when it is not in a git repository', function (t)
 		cleanup(tmpDir);
 	});
 });
+
+test('CLI: --auto mode reports incompatible options before anything else', function (t) {
+	var cases = [
+		{ args: '-i x', setup: function () {} },
+		{ args: '-u x -g dir', setup: function (dir) { fs.mkdirSync(path.join(dir, 'dir')); } },
+		{ args: '-k -d', setup: function () {} },
+	];
+	t.plan(cases.length * 2);
+	cases.forEach(function (testCase) {
+		var tmpDir = createTempDir();
+		testCase.setup(tmpDir);
+		run('node ' + binPath + ' --auto ' + testCase.args, tmpDir, function (result) {
+			t.equal(result.exitCode, 1, '`' + testCase.args + '`: exits with code 1');
+			t.ok(result.stderr.indexOf('incompatible') > -1, '`' + testCase.args + '`: error message says the options are incompatible');
+			cleanup(tmpDir);
+		});
+	});
+});

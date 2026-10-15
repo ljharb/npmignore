@@ -52,6 +52,11 @@ function stringOption(value, flags) {
 }
 
 if (auto) {
+	if (i || u || npmignoreArg || keepdest) {
+		console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
+		process.exit(1);
+	}
+
 	gitignore = stringOption(gitignore, '-g`/`--gitignore');
 	dest = stringOption(dest, '-d`/`--dest');
 
@@ -62,11 +67,6 @@ if (auto) {
 	}, function (err, result) {
 		if (!err && !result.gitignore) {
 			console.error('gitignore file not found (tried `' + gitignore + '`)');
-			process.exit(1);
-		}
-
-		if (i || u || npmignoreArg || keepdest) {
-			console.error('`auto` option is incompatible with `ignore`, `unignore`, `keepdest`, and `npmignore` options');
 			process.exit(1);
 		}
 
