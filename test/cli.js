@@ -219,6 +219,32 @@ test('CLI: --auto mode does not pass --dest through a shell', function (t) {
 	});
 });
 
+test('CLI: --auto mode does not C-quote globally ignored paths', function (t) {
+	t.plan(3);
+	var tmpDir = createTempDir();
+	var repo = path.join(tmpDir, 'repo');
+	fs.mkdirSync(repo);
+	var excludesFile = path.join(tmpDir, 'global-gitignore');
+	fs.writeFileSync(excludesFile, '*.swp\n');
+
+	run('git init && git config core.excludesFile "' + excludesFile + '" && git config core.quotePath true', repo, function (initResult) {
+		t.equal(initResult.exitCode, 0, 'fixture repo is set up');
+		fs.writeFileSync(path.join(repo, '.gitignore'), '.npmignore\n');
+		fs.writeFileSync(path.join(repo, 'package.json'), JSON.stringify({
+			name: 'test',
+			version: '1.0.0',
+		}));
+		fs.writeFileSync(path.join(repo, 'ü "x".swp'), '');
+
+		run('node ' + binPath + ' --auto', repo, function (result) {
+			t.equal(result.exitCode, 0, 'exits with code 0');
+			var lines = fs.readFileSync(path.join(repo, '.npmignore'), 'utf8').split('\n');
+			t.ok(lines.indexOf('ü "x".swp') > -1, '.npmignore contains the unquoted globally ignored path');
+			cleanup(tmpDir);
+		});
+	});
+});
+
 test('CLI: --auto mode crashes on a `package.json` of `null`', function (t) {
 	t.plan(3);
 	var tmpDir = createTempDir();

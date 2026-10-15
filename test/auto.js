@@ -359,6 +359,25 @@ test('npmignoreAuto: `gitignore`, `dest`, and `commentLines` options', function 
 	});
 });
 
+test('npmignoreAuto: paths are not quoted, even when `core.quotePath` is enabled', function (t) {
+	createRepo(t, '*.npmignore\n*.swp\n', function (repo) {
+		execFile('git', ['config', 'core.quotePath', 'true'], { cwd: repo }, function (err) {
+			t.error(err, 'fixture repo quotePath configured');
+			write(repo, '.gitignore', 'node_modules/\n');
+			write(repo, 'package.json', {});
+			write(repo, 'é.npmignore', 'existing\n');
+			write(repo, 'ü "x".swp', '');
+
+			npmignoreAuto({ cwd: repo, dest: 'é.npmignore' }, function (err2, result) {
+				t.error(err2, 'no error');
+				t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
+				t.deepEqual(result.globallyIgnored, ['ü "x".swp'], 'globally ignored paths are unquoted, and exclude the destination');
+				t.end();
+			});
+		});
+	});
+});
+
 test('npmignoreAuto: the destination is excluded from globally ignored files when given through a symlink', function (t) {
 	createRepo(t, '.npmignore\n*.swp\n', function (repo) {
 		write(repo, '.gitignore', 'node_modules/\n');
