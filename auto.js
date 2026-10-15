@@ -61,13 +61,14 @@ function readPublishConfig(cwd) {
 }
 
 function validateOptions(options) {
-	if (typeof options !== 'object') {
+	if (typeof options !== 'object' || Array.isArray(options)) {
 		throw new TypeError('`options`, when provided, must be an object');
 	}
 	var names = ['cwd', 'gitignore', 'dest'];
 	for (var i = 0; i < names.length; i++) {
-		if (typeof options[names[i]] !== 'undefined' && typeof options[names[i]] !== 'string') {
-			throw new TypeError('`' + names[i] + '` option, when provided, must be a string');
+		var value = options[names[i]];
+		if (typeof value !== 'undefined' && (typeof value !== 'string' || value.indexOf('\0') !== -1)) {
+			throw new TypeError('`' + names[i] + '` option, when provided, must be a string without NUL characters');
 		}
 	}
 	if (typeof options.commentLines !== 'undefined' && !Array.isArray(options.commentLines)) {
@@ -111,15 +112,33 @@ function computeContent(ctx, done) {
 		}
 
 		if (ignore) {
-			result.ignore = ignore;
-			result.content = npmignore('', ctx.git, {
-				commentLines: ctx.commentLines,
-				ignore: ignore,
-			});
+			result.ignore = ignore.slice();
+			try {
+				result.content = npmignore('', ctx.git, {
+					commentLines: ctx.commentLines,
+					ignore: ignore,
+				});
+			} catch (e) {
+				return done(e); // eg, `publishConfig.ignore` has an entry that can not be converted to a string
+			}
 		}
 
-		done();
+		return done();
 	});
+}
+
+function initialResult(cwd, dest) {
+	return {
+		content: null,
+		cwd: cwd,
+		dest: dest,
+		destIgnored: null,
+		gitignore: null,
+		globallyIgnored: null,
+		hasPublishConfig: null,
+		ignore: null,
+		publishConfigIgnore: null,
+	};
 }
 
 module.exports = function npmignoreAuto(opts, cb) {
@@ -132,18 +151,7 @@ module.exports = function npmignoreAuto(opts, cb) {
 
 	var cwd = path.resolve(options.cwd || process.cwd());
 	var dest = options.dest || '.npmignore';
-
-	var result = {
-		content: null,
-		cwd: cwd,
-		dest: path.resolve(cwd, dest),
-		destIgnored: null,
-		gitignore: null,
-		globallyIgnored: [],
-		hasPublishConfig: null,
-		ignore: null,
-		publishConfigIgnore: null,
-	};
+	var result = initialResult(cwd, path.resolve(cwd, dest));
 
 	function done(err) {
 		process.nextTick(function () {
@@ -154,7 +162,17 @@ module.exports = function npmignoreAuto(opts, cb) {
 		});
 	}
 
-	var git = findGitignore(options.gitignore || '.gitignore', cwd);
+	var git;
+	try {
+		if (!fs.statSync(cwd).isDirectory()) {
+			var notDir = new Error('ENOTDIR: not a directory, `' + cwd + '`');
+			notDir.code = 'ENOTDIR';
+			throw notDir;
+		}
+		git = findGitignore(options.gitignore || '.gitignore', cwd);
+	} catch (e) {
+		return done(e);
+	}
 	if (!git) {
 		return done();
 	}

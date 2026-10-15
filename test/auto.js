@@ -121,7 +121,7 @@ test('npmignoreAuto: no gitignore found', function (t) {
 			dest: path.join(dir, '.npmignore'),
 			destIgnored: null,
 			gitignore: null,
-			globallyIgnored: [],
+			globallyIgnored: null,
 			hasPublishConfig: null,
 			ignore: null,
 			publishConfigIgnore: null,
@@ -461,6 +461,89 @@ test('npmignoreAuto: the destination is excluded from globally ignored files whe
 			t.error(err, 'no error');
 			t.equal(result.destIgnored, true, 'destination is ignored by the global gitignore');
 			t.deepEqual(result.globallyIgnored, ['a.log'], 'the destination is not reported as globally ignored');
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: invalid options', function (t) {
+	var noop = function () {};
+	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');
+	t.throws(function () { npmignoreAuto({ dest: 'a\0b' }, noop); }, TypeError, 'throws with a NUL character in `dest`');
+	t.throws(function () { npmignoreAuto({ cwd: 'a\0b' }, noop); }, TypeError, 'throws with a NUL character in `cwd`');
+	t.throws(function () { npmignoreAuto({ gitignore: 'a\0b' }, noop); }, TypeError, 'throws with a NUL character in `gitignore`');
+	t.end();
+});
+
+test('npmignoreAuto: errors reading the gitignore are passed to the callback', function (t) {
+	createRepo(t, '', function (repo) {
+		fs.mkdirSync(path.join(repo, 'dir.gi'));
+
+		var sync = true;
+		npmignoreAuto({ cwd: repo, gitignore: 'dir.gi' }, function (err, result) {
+			t.equal(sync, false, 'callback is called asynchronously');
+			t.equal(err && err.code, 'EISDIR', 'yields the error from reading the gitignore');
+			t.equal(result, undefined, 'no result');
+			t.end();
+		});
+		sync = false;
+	});
+});
+
+test('npmignoreAuto: `ignore` is a separate array from `publishConfigIgnore`', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		write(repo, 'package.json', { publishConfig: { ignore: ['foo'] } });
+
+		npmignoreAuto({ cwd: repo }, function (err, result) {
+			t.error(err, 'no error');
+			t.deepEqual(result.ignore, result.publishConfigIgnore, 'same contents');
+			t.notEqual(result.ignore, result.publishConfigIgnore, 'different arrays');
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: a `cwd` that is a file yields an error asynchronously', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		write(repo, 'package.json', {});
+
+		var sync = true;
+		npmignoreAuto({ cwd: path.join(repo, 'package.json') }, function (err, result) {
+			t.equal(sync, false, 'callback is called asynchronously');
+			t.ok(err, 'yields an error');
+			t.equal(result, undefined, 'no result');
+			t.end();
+		});
+		sync = false;
+	});
+});
+
+test('npmignoreAuto: a missing `cwd` yields an error asynchronously', function (t) {
+	var dir = createTempDir();
+	t.teardown(function () {
+		cleanup(dir);
+	});
+
+	var sync = true;
+	npmignoreAuto({ cwd: path.join(dir, 'missing') }, function (err, result) {
+		t.equal(sync, false, 'callback is called asynchronously');
+		t.equal(err && err.code, 'ENOENT', 'yields the error from finding `cwd`');
+		t.equal(result, undefined, 'no result');
+		t.end();
+	});
+	sync = false;
+});
+
+test('npmignoreAuto: errors while generating the content are passed to the callback', function (t) {
+	createRepo(t, '', function (repo) {
+		write(repo, '.gitignore', '.npmignore\n');
+		write(repo, 'package.json', { publishConfig: { ignore: [{ toString: 1 }] } });
+
+		npmignoreAuto({ cwd: repo }, function (err, result) {
+			t.ok(err instanceof TypeError, 'yields the TypeError from converting an entry to a string');
+			t.equal(result, undefined, 'no result');
 			t.end();
 		});
 	});
