@@ -129,6 +129,46 @@ npmignore(npm, git, options);
     + `unignore` Array of patterns to remove from `.npmignore`. This will not un-ignore patterns in `.gitignore`
     + `keepdest` if `true`, avoids altering the destination file
 
+### `--auto` API
+
+The computation behind `npmignore --auto` is available without writing any files:
+
+```js
+var npmignoreAuto = require('npmignore/auto');
+
+npmignoreAuto(options, function (err, result) {
+	if (err) {
+		// e.g. `package.json` is missing or invalid, `publishConfig.ignore` is not an array (a `TypeError`), `cwd` is not a directory, a gitignore file could not be read, or `git` failed (including when a gitignore was found, but `cwd` is not in a git repository)
+	}
+	// `result.content` is what `npmignore --auto` would write to `result.dest`, or `null` if it would write nothing
+});
+```
+
+The callback is always called asynchronously. Invalid arguments throw a `TypeError` synchronously.
+
+**Params**
+
+ - `options` {Object} (optional)
+    + `cwd` String: the package directory. Defaults to `process.cwd()`
+    + `gitignore` String: path (relative to `cwd`) to the `.gitignore` file, or a comma-separated list of them; empty entries and missing files are skipped. Defaults to `.gitignore`. If none of the files exist, the nearest file named like the last nonempty entry's last path segment, in `cwd` or an ancestor directory, is used
+    + `dest` String: path (relative to `cwd`) of the would-be `.npmignore` file. Defaults to `.npmignore`
+    + `commentLines` Array of comment lines, as above
+ - `callback` {Function}: called with `(err, result)`
+
+**Result**
+
+ - `content` {String|null}: the would-be `.npmignore` content; `null` when no gitignore was found, when `dest` is not ignored by git, or when there is no `publishConfig.ignore` and there are no globally ignored files (an empty `publishConfig.ignore` still produces content)
+ - `cwd` {String}: the absolute package directory
+ - `dest` {String}: the absolute path of `dest`
+ - `destIgnored` {Boolean|null}: whether `dest` is ignored by git, which `--auto` mode requires; `null` if no gitignore was found
+ - `gitignore` {String|null}: the gitignore that was read: the `gitignore` option as given (or `.gitignore`), if any of its files exist; otherwise the absolute path found by searching upward; `null` if none was found
+ - `hasPublishConfig` {Boolean|null}: whether `package.json` has a `publishConfig`; `null` if `package.json` was not read (because no gitignore was found, or `dest` is not ignored)
+ - `publishConfigIgnore` {Array|null}: a copy of the `publishConfig.ignore` array; `null` if there is none, or `package.json` was not read
+ - `globallyIgnored` {Array|null}: patterns for files that git ignores, but `npm` would not: those that a rule in `core.excludesFile` or `.git/info/exclude` ignores, and those whose deciding rule is in a `.gitignore` that `npm` will not apply (one above `cwd`, other than the gitignore that was read for a rule without a `/` before its end; or one in a subdirectory that has an `.npmignore`), excluding `dest` itself. Each pattern is anchored to `cwd`, uses the names on disk, and is escaped (a line break in a name, which a pattern can not contain, matches any character). A directory (eg, `/dir/`) is used only when every file in it is globally ignored, and no pattern is written that would also match a file or directory that is not globally ignored, when ignoring case as `npm` does. `null` if they were not computed
+ - `ignore` {Array|null}: the patterns added after the gitignore content (`publishConfigIgnore` followed by `globallyIgnored`; `content` omits duplicates); `null` if there is no `publishConfig.ignore` and no globally ignored files
+
+An existing `dest` file is neither read nor removed.
+
 ## Tests
 Simply clone the repo, `npm install`, and run `npm test`
 
