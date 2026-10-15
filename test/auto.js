@@ -536,6 +536,59 @@ test('npmignoreAuto: a `dest` that looks like pathspec magic is treated as a pat
 	});
 });
 
+test('npmignoreAuto: a very large list of ignored files', function (t) {
+	createRepo(t, '*.swp\n', function (repo) {
+		write(repo, '.gitignore', '.npmignore\nnode_modules/\n');
+		write(repo, 'package.json', {});
+		write(repo, 'a.swp', '');
+		fs.mkdirSync(path.join(repo, 'node_modules'));
+		var name = new Array(241).join('x');
+		for (var i = 0; i < 5000; i++) {
+			write(repo, 'node_modules/' + name + i, '');
+		}
+
+		npmignoreAuto({ cwd: repo }, function (err, result) {
+			t.error(err, 'no error, even with more than 1MB of `git ls-files` output');
+			t.deepEqual(result && result.globallyIgnored, ['a.swp'], 'globally ignored files are still found');
+			t.end();
+		});
+	});
+});
+
+test('npmignoreAuto: `git ls-files` failures are reported', { skip: process.platform === 'win32' }, function (t) {
+	execFile('sh', ['-c', 'command -v git'], function (whichErr, gitPath) {
+		t.error(whichErr, 'found `git`');
+
+		createRepo(t, '*.swp\n', function (repo) {
+			write(repo, '.gitignore', '.npmignore\n');
+			write(repo, 'package.json', {});
+			write(repo, 'a.swp', '');
+
+			var shimDir = createTempDir();
+			var origPath = process.env.PATH;
+			t.teardown(function () {
+				process.env.PATH = origPath;
+				cleanup(shimDir);
+			});
+			// a `git` that runs the real one, except for `ls-files`
+			fs.writeFileSync(path.join(shimDir, 'git'), [
+				'#!/bin/sh',
+				'if [ "$1" = ls-files ]; then echo "ls-files failed" >&2; exit 1; fi',
+				'exec "' + String(gitPath).trim() + '" "$@"',
+				'',
+			].join('\n'));
+			fs.chmodSync(path.join(shimDir, 'git'), parseInt('755', 8));
+			process.env.PATH = shimDir + path.delimiter + origPath;
+
+			npmignoreAuto({ cwd: repo }, function (err, result) {
+				t.ok(err && err.message.indexOf('ls-files failed') > -1, 'yields the error from `git ls-files`');
+				t.equal(result, undefined, 'no result');
+				t.end();
+			});
+		});
+	});
+});
+
 test('npmignoreAuto: invalid options', function (t) {
 	var noop = function () {};
 	t.throws(function () { npmignoreAuto([], noop); }, TypeError, 'throws with array options');

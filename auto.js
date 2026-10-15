@@ -104,7 +104,10 @@ function computeContent(ctx, done) {
 	return computeGloballyIgnoredFiles({
 		cwd: result.cwd,
 		isExcluded: isSameEntryAs(result.dest),
-	}, function (globallyIgnored) {
+	}, function (err, globallyIgnored) {
+		if (err) {
+			return done(err);
+		}
 		result.globallyIgnored = globallyIgnored;
 
 		var ignore = publishConfig.ignore;
