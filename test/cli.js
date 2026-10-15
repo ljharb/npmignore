@@ -1,9 +1,9 @@
 'use strict';
 
 var test = require('tape');
+var tmp = require('tmp');
 var path = require('path');
 var fs = require('fs');
-var os = require('os');
 var exec = require('child_process').exec;
 
 var binPath = path.join(__dirname, '..', 'bin', 'npmignore');
@@ -15,12 +15,8 @@ Object.keys(process.env).forEach(function (key) {
 	}
 });
 
-var counter = 0;
 function createTempDir() {
-	counter += 1;
-	var tmpDir = path.join(fs.realpathSync(os.tmpdir()), 'npmignore-cli-test-' + process.pid + '-' + Date.now() + '-' + counter);
-	fs.mkdirSync(tmpDir);
-	return tmpDir;
+	return fs.realpathSync(tmp.dirSync({ prefix: 'npmignore-cli-test-' }).name);
 }
 
 function cleanup(dir) {

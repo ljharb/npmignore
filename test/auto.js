@@ -1,8 +1,8 @@
 'use strict';
 
 var test = require('tape');
+var tmp = require('tmp');
 var fs = require('fs');
-var os = require('os');
 var path = require('path');
 var execFile = require('child_process').execFile;
 
@@ -17,12 +17,8 @@ Object.keys(process.env).forEach(function (key) {
 
 var commentPreamble = '\n\n# npmignore - content above this line is automatically generated and modifications may be omitted\n# see npmjs.com/npmignore for more details.\n';
 
-var counter = 0;
 function createTempDir() {
-	counter += 1;
-	var dir = path.join(fs.realpathSync(os.tmpdir()), 'npmignore-auto-test-' + process.pid + '-' + Date.now() + '-' + counter);
-	fs.mkdirSync(dir);
-	return dir;
+	return fs.realpathSync(tmp.dirSync({ prefix: 'npmignore-auto-test-' }).name);
 }
 
 function cleanup(dir) {

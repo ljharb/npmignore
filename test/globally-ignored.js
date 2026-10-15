@@ -1,8 +1,8 @@
 'use strict';
 
 var test = require('tape');
+var tmp = require('tmp');
 var fs = require('fs');
-var os = require('os');
 var path = require('path');
 var execFile = require('child_process').execFile;
 
@@ -19,11 +19,8 @@ function isNever() {
 	return false;
 }
 
-var counter = 0;
 function createTempDir(t) {
-	counter += 1;
-	var dir = path.join(fs.realpathSync(os.tmpdir()), 'npmignore-globally-ignored-test-' + process.pid + '-' + Date.now() + '-' + counter);
-	fs.mkdirSync(dir);
+	var dir = fs.realpathSync(tmp.dirSync({ prefix: 'npmignore-globally-ignored-test-' }).name);
 	t.teardown(function cleanup() {
 		(function rm(d) {
 			fs.readdirSync(d).forEach(function (name) {
